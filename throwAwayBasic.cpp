@@ -6,11 +6,14 @@
 
 using namespace std;
 
-
 // structs for testing:
 struct point {
     int x, y;
 };
+
+
+typedef vector<point>::iterator I; //Define I type as I
+
 
 // Standard Functions: 
 
@@ -44,7 +47,7 @@ struct PointPlane {
         return 0;
     };
     int GetHullPoints (){
-        vector<point>::iterator iter;
+        I iter;
         for (iter = this->ConveXHull.begin(); iter != this->ConveXHull.end(); iter++){
             std::cout << (*iter).x << " ";
             std::cout << (*iter).y << " \n";
@@ -52,8 +55,34 @@ struct PointPlane {
         return 0;
     }
 };
+
+bool noTurn(point p, point q, point r) {
+    int px = p.x;
+    int py = p.y;
+    int qx = q.x;
+    int qy = q.y;
+    int rx = r.x;
+    int ry = r.y;
+    int lhs = (qx - px) * (ry - py);
+    int rhs = (rx - px) * (qy - py);
+
+    return lhs == rhs;
+}
+//Find if point p is on line segment qr
+bool onLineSegment(point p, point q, point r) {
+    point left = (q.x < r.x) ? q : r;
+    point right = (q.x > r.x) ? q : r;
+    if (p.x < left.x) {
+        return false;
+    }
+    if (p.x > right.x) {
+        return false;
+    }
+    return noTurn(p, q, r);
+}
+
 // Function to find eight extreme points
-vector<point> findExtrema(vector<point>::iterator first, vector<point>::iterator past) {
+vector<point> findExtrema(I first, I past) {
     assert(first != past);
     vector<point> max_position(8, (*first)); //Vector to keep extreme points 
     
@@ -67,7 +96,7 @@ vector<point> findExtrema(vector<point>::iterator first, vector<point>::iterator
     int sw = -(xmin + ymin);
     int nw = ymin - xmin;
 
-    vector<point>::iterator i; 
+    I i; 
     for (i = first; i != past; ++i) { //Iterate over each point in the convex hull
         if ((*i).x < xmin) { //Update min x value 
             xmin = (*i).x; 
@@ -133,6 +162,30 @@ void removeDuplicates(vector<point> S) {
     }
 }
 
+bool betweenPolynomialChains(point p, I upper, I uend, I lower, I lend) {
+    I i = upper;
+    I last = std::prev(uend);
+    do {
+        ++i;
+    } while (i != last and (*i).x < p.x);
+    if (isLeftTurn(*std::prev(i), *i, p)) {
+        return false;
+    }
+    last = std::prev(lend);
+    I j = lower;
+    do {
+        ++j;
+    } while (j != last and (*j).x > p.x);
+    if (isLeftTurn(*std::prev(j), *j, p)) {
+        return false;
+    }
+    return true;
+}
+
+I eliminateInnerPoints(I first, I past, I polygon, I rest) {
+    assert(polygon != rest);
+    
+}
 // The general idea is, we create classes which inherit the baseclass 
 // and have a additional function, which implements different throwaway tactics.
 struct testPlane : PointPlane {
