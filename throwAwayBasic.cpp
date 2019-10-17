@@ -15,7 +15,10 @@ bool isLeftTurn ( point p1, point p2, point p3){
 float test = (p3.y - p1.y)*(p2.x - p1.x) -
              (p2.y - p1.y)*(p3.x - p1.x);
 return (test > 0 ) ? 1 : 0; 
-}
+};
+constexpr void swap( point p1, point p2){
+    iter_swap(*p1,*p2);
+};
 
 // Implement a struct, which contains the convex hull and number of comparisons.
 struct PointPlane {
@@ -29,7 +32,7 @@ struct PointPlane {
             point NewPoint;
             NewPoint.x = rand() % RangeX + 1;
             NewPoint.y = rand() % RangeY + 1;
-            points.push_back(NewPoint);
+            points.push_back(NewPoint);DETTE ER EN TEST FOR SATAN!
         };
         this->ConveXHull = points;
         this->AllPoints = points; 
@@ -42,13 +45,17 @@ struct PointPlane {
             std::cout << (*iter).y << " \n";
         }
         return 0;
+    };
+    int PlaneSweep () {
+        return 0;
     }
 };
 // The general idea is, we create classes which inherit the baseclass 
 // and have a additional function, which implements different throwaway tactics.
-struct testPlane : PointPlane {
-    int TestMig(){
-        std::cout  << " DETTE ER EN TEST FOR SATAN! ";
+struct BasicThrowAway : PointPlane {
+    int ThrowAwayHull(){
+        std::cout  << " Dette skal implementeres ";
+        return 0;
     }
 };
 
@@ -58,7 +65,9 @@ int main()
     PointPlane plane;
     plane.GeneratePointList(20,100,10);
     plane.GetHullPoints();
-    testPlane testo;
-    testo.TestMig();
+    BasicThrowAway testo;
+    testo.ThrowAwayHull();
+    std::cout << plane.ConveXHull[2]  << " ";
+
     return 0;
 }
