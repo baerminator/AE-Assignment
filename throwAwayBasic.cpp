@@ -184,6 +184,13 @@ bool betweenPolynomialChains(point p, I upper, I uend, I lower, I lend) {
 
 I eliminateInnerPoints(I first, I past, I polygon, I rest) {
     assert(polygon != rest);
+    using P = point;
+    if (std::distance(polygon, rest) == 1) {
+        I mid = std::partition(first, past, [&](P point r) -> bool {
+            return not (r == *polygon);
+        });
+        return mid;
+    }
     
 }
 // The general idea is, we create classes which inherit the baseclass 
