@@ -23,15 +23,16 @@ float test = (p3.y - p1.y)*(p2.x - p1.x) -
              (p2.y - p1.y)*(p3.x - p1.x);
 return (test > 0 ) ? 1 : 0; 
 };
-constexpr void swap( point p1, point p2){
-    iter_swap(*p1,*p2);
+constexpr void swap( vector<point>::iterator p1,
+ vector<point>::iterator p2){
+    iter_swap(p1,p2);
 };
 
 //Equality operator for our points
 bool operator==(const point& p1, const point& p2) {
     return (p1.x == p2.x && p1.y == p2.y);
 }
-
+// NameSpace used for validation:
 namespace validation {
     bool same_multiset(I p, I q, I r, I s) {
         using P = typename std::iterator_traits<I>::value_type;
@@ -74,7 +75,7 @@ struct PointPlane {
             point NewPoint;
             NewPoint.x = rand() % RangeX + 1;
             NewPoint.y = rand() % RangeY + 1;
-            points.push_back(NewPoint);DETTE ER EN TEST FOR SATAN!
+            points.push_back(NewPoint);
         };
         this->ConveXHull = points;
         this->AllPoints = points; 
@@ -93,6 +94,241 @@ struct PointPlane {
     }
 };
 
+// #################################################################
+// ############# SIMPLE PLANESWEEP HULL ############################
+//##################################################################
+
+
+
+namespace planesweep {
+
+bool comp(point a, point b){
+    return (a. x < b. x) or (a. x == b. x and a. y < b. y);
+}
+
+
+template<typename I>
+void swap_blocks(I source, I past, I target) {
+    // retains the order in [ source , past)
+    if (source == target || source == past) {
+        return;
+    }
+    using P = typename std :: iterator_traits<I> :: value_type;
+    I hole = target;
+    P p = * target;
+    I const last = std :: prev(past) ;
+    while (true) {
+        * hole = * source;
+        ++hole;
+        if (source == last) {
+            break;
+        }
+        *source = *hole;
+        ++source
+    }
+    *source = p;
+}
+
+
+
+
+template<typename I>
+std :: pair<I, I> find_poles(I first, I past) {
+using P = typename std : : iterator_traits<I> : : value_type;
+auto pair = std :: minmax_element(first, past,comp)
+return pair;
+}
+
+// remove all element on top of each oth
+template<typename I, typename C>
+    std :: pair<I, I> clean(I pole, I rest, C compare) {
+    assert(pole != rest) ;
+    I k = std :: next(pole) ;
+    while (k !=rest && ( * k).x == ( * pole) . x) {
+        ++k;
+    }
+    if (k == std :: next(pole)) {
+        return std :: make_pair(pole, std :: next(pole)) ; 
+    }
+    I bottom = std :: min_element(pole, k, compare) ;
+    std :: iter_swap(pole, bottom) ;
+    I top = std :: max_element(std :: next(pole) , k, compare) ;
+    if (( * top) . y == ( * pole) . y) {
+    return std :: make_pair(pole, k) ;
+    }
+    std :: iter_swap(std :: next(pole) , top) ;
+    return std :: make_pair(std :: next(pole) , k) ;
+}
+// using left turn test
+template<typename I>
+    I scan(I first, I top, I next, I past) {
+    assert(first != past) ;
+    for (I i = next; i != past; ++i) {
+        while (top != first && not right_turn( * std :: prev(top) , * i) ) {
+            -- top;
+        }
+        ++top;
+        std :: iter_swap(i, top) ;
+    }
+    return ++top;
+}
+template<typename I>
+I scan_one_more(I first, I top, I extra) {
+    while (top  != first && not right_turn( * std :: prev(top) , * extra) ) {
+        --top;
+    }
+    return ++top;
+}
+
+// Brute Force part
+
+template<typename I, typename C>
+I brute_force(I first, I past, C compare) {
+    std :: size_t n = std : : distance(first, past) ;
+    assert(n <= 4) ;
+    if (n <= 1) {
+        return past;
+    }
+    else if (n == 2) {
+        if ( * first == * std : : next(first) ) {
+            return std : : next(first) ;
+        }
+        if (not compare( * first, * std :: next(first) ) ) {
+            std :: iter_swap(first, std :: next(first) ) ;
+        }
+        return past;
+    }
+    if (n == 3) {
+        I west = std :: min_element(first, past, compare) ;
+        std :: iter_swap(first, west) ;
+        I east = std :: max_element(std :: next(first) , past, compare) ;
+        if ( * first == * east) {
+            return std : : next(first) ;
+        }
+        std :: iter_swap(std :: next(std :: next(first) ) , east) ;
+        if (right_turn( * first, * std :: next(first) , * std : : next(std : : next(first) ) ) ) {
+            return std : : next(std :: next(std :: next(first) ) ) ;
+        }
+        std :: iter_swap(std :: next(first) , std :: next(std :: next(first) ) ) ;
+        return std :: next(std :: next(first) ) ;
+    }
+// n == 4
+    I west = std :: min_element(first, past, compare) ;
+    std :: iter_swap(first, west) ;
+    I east = std :: max_element(std :: next(first) , past, compare) ;
+    if ( * first == * east) {
+        return std :: next(first) ;
+    }
+    std :: iter_swap(std :: next(std :: next(std :: next(first) ) ) , east) ;
+
+    if (not compare( * std :: next(first) , * std :: next(std :: next(first) ) ) ) {
+        std :: iter_swap(std :: next(first) , std :: next(std :: next(first) ) ) ;
+    }
+    I rest = scan(first, first, std :: next(first) , past) ;
+    return rest;
+}
+template<typename I, typename C>
+I conquer(I first, I past, C compare) {
+    std :: size_t n = std :: distance(first, past) ;
+    if (n <= 4) {
+        return brute_force(first, past, compare) ;
+    }
+    I middle = first;
+    std :: advance(middle, n / 2) ;
+    I rest1 = conquer(first, middle, compare) ;
+    I rest2 = conquer(middle, past, compare) ;
+    std :: size_t h2 = std :: distance(middle, rest2 ) ;
+    I rest = rest1 ;
+    std :: advance(rest, h2 ) ;
+    swap_blocks(middle, rest2 , rest1 ) ;
+    std :: inplace_merge(first, rest1 , rest, compare) ;
+    std :: pair<I, I> pair = clean(first, rest, compare) ;
+    I top = std :: get<0> (pair) ;
+    I next = std :: get<1> (pair) ;
+    rest = scan(first, top, next, rest) ;
+    return rest;
+}
+
+
+
+
+
+int orientation(point p, point q, point r) 
+{ 
+    int val = (q.y - p.y) * (r.x - q.x) - 
+              (q.x - p.x) * (r.y - q.y); 
+  
+    if (val == 0) return 0;  // colinear 
+    return (val > 0)? 1: 2; // clock or counterclock wise 
+} 
+
+
+
+vector<point>::iterator solve(vector<point>:: iterator first,
+           vector<point>:: iterator past, int n) { 
+    // There must be at least 3 points 
+    if (n < 3) return; 
+  
+    // Initialize Result 
+    vector<point> hull; 
+  
+    // Here we find the dividing line between the upper and lower part of the hull
+    pair<vector<point>::iterator,
+         vector<point>::iterator> POLES = find_poles(first,past);
+    vector<point>::iterator left =  first;
+    vector<point>::iterator right =  std::prev(past);
+    iter_swap(std :: get<0> (POLES), left);
+    iter_swap(std :: get<0> (POLES), right);
+    int upper_limit = std :: max(( * left) . y, ( * right) . y) ;
+    int lower_limit = std :: min(( * left) . y, ( * right) . y) ;
+    // Now we partition the Hull in two part with partition:
+    I i = std :: partition(std :: next(left) , right,
+        [&](point const& q) {
+            if (q. y >= upper_limit) {
+                return true;
+            }
+            else if (q.y <= lower_limit) {
+                return false ;
+            }
+            return not isLeftTurn( *left, q, *right) ;
+        }) ;
+
+    std :: iter_swap(i, right);
+
+    // Now The Entire partition is complete and the lower partition begins with right.
+    // Now we sort it and planesweep
+    
+    // Sort and sweep lower hull
+    using P = typename std :: iterator_traits<I> :: value_type;
+    vector<point>::iterator middle = std :: next( right);
+    vector<point>::iterator rest1 = conquer(first, middle,
+        [ ](P const& a, P const& b) {
+            return a. x < b. x or (a. x == b. x and a. y < b. y) ;
+        }) ;
+    if (middle == past) {
+        return rest1 ;
+    }
+    vector<point>::iterator west = first;
+    std :: iter_swap(std :: prev(rest1 ) , std :: prev(middle) ) ;
+    // Sort and sweep lower hull
+    vector<point>::iterator east = std :: prev(middle) ;
+    vector<point>::iterator rest2 = conquer(east, past,
+    [ ](P const& a, P const& b) {
+        return a. x > b. x or (a. x == b. x and a. y > b. y) ;
+    });
+    if (rest2 != east) {
+        rest2 = scan_one_more(east, std :: prev(rest2 ) , west) ;
+    }
+    std :: size_t h2 = std :: distance(east, rest2 ) ;
+    vector<point>::iterator rest = rest1 ;
+    std :: advance(rest, h2 - 1) ;
+    swap_blocks(east, rest2 , std :: prev(rest1 ) ) ;
+    return rest;
+      
+}
+// #################################################################
+// ############# SIMPLE THROWAWAY HULL #############################
+//##################################################################
 bool noTurn(point p, point q, point r) {
     int px = p.x;
     int py = p.y;
@@ -289,7 +525,9 @@ I solve(I first, I past) {
 #endif
     return plane_sweep::solve(first, rest);
 }
-
+// #############################################################
+// ############## END Of Simple ThrowAway##################
+// #############################################################
 bool check(I first, I past) {
     using P = I; 
     using S = std::vector<I>;
@@ -300,10 +538,12 @@ bool check(I first, I past) {
     data.resize(n);
     std::copy(first, past, data.begin());
     J rest = solve(data.begin(), data.end());
-    bool ok = validation::same_multiset(data.begin(), data.end(), first, past) and validation::convex_polygon(
-        data.begin(), rest) and validation::all_inside(rest, data.end(), data.begin(), rest);
+    bool ok = (
+        validation::same_multiset(data.begin(), data.end(), first, past) and
+        validation::convex_polygon( data.begin(), rest) and 
+        validation::all_inside(rest, data.end(), data.begin(), rest)
+    );
     return ok;
-    )
 }
 
 // The general idea is, we create classes which inherit the baseclass 
@@ -320,8 +560,5 @@ int main() {
     PointPlane plane;
     plane.GeneratePointList(20,100,10);
     plane.GetHullPoints();
-    BasicThrowAway testo;
-    testo.ThrowAwayHull();
-    std::cout << plane.ConveXHull[2]  << " ";
     return 0;
 };
