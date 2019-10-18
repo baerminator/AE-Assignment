@@ -32,6 +32,36 @@ bool operator==(const point& p1, const point& p2) {
     return (p1.x == p2.x && p1.y == p2.y);
 }
 
+namespace validation {
+    bool same_multiset(I p, I q, I r, I s) {
+        using P = typename std::iterator_traits<I>::value_type;
+        using S = std::vector<P>;
+        std::size_t n = std::distance(p, q);
+        std::size_t m = std::distance(r, s);
+        if (m != n) {
+            return false;
+        }
+        S backup; 
+        backup.resize(n);
+        std::copy(p, q, backup.begin());
+        std::sort(backup.begin(), backup.end(),
+        [](P const& a, P const& b) -> bool {
+            return (a.x< b.x) or (a.x == b.x and a.y < b.y);
+        });
+        S other; 
+        other.resize(n);
+        std::copy(r, s, other.begin());
+        std::sort(other.begin(), other.end(),
+        [](P const& a, P const& b) -> bool {
+            return (a.x < b.x or (a.x == b.x and a.y < b.y);
+        });
+        return std::equal(backup.begin(), backup.end(), other.begin(),
+        [](P const& a, P const& b) -> bool {
+            return (a.x == b.x) and (a.y == b.y);
+        });
+    }
+}
+
 // Implement a struct, which contains the convex hull and number of comparisons.
 struct PointPlane {
     int NrComps;
