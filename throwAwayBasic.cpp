@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <cassert>
 #include <iterator>
+#include <algorithm>    
 
 using namespace std;
 
@@ -186,13 +187,89 @@ I eliminateInnerPoints(I first, I past, I polygon, I rest) {
     assert(polygon != rest);
     using P = point;
     if (std::distance(polygon, rest) == 1) {
-        I mid = std::partition(first, past, [&](P point r) -> bool {
+        I mid = std::partition(first, past, [&](P const& r) -> bool {
             return not (r == *polygon);
         });
         return mid;
     }
-    
+    if (std::distance(polygon, rest) == 2) {
+        I mid = std::partition(first, past, [&](P const& r) -> bool {
+            return not (onLineSegment(*polygon, *std::next(polygon), r));
+        });
+        return mid;
+    }
+    assert(std::distance(polygon, rest) > 2);
+    std::vector<P> apprHull;
+    for (I k = polygon; k != rest; ++k) {
+        apprHull.push_back(*k);
+    }
+    apprHull.push_back(*polygon);
+    I upper = apprHull.begin();
+    if ((*upper).x == (*std::next(upper)).x) {
+        ++upper;
+    }
+    I lower = upper; 
+    I last = apprHull.end();
+    for (I k = std::next(upper); k != last; ++k) {
+        if ((*lower).y < (*k).y) {
+            lower = k;
+        }
+    }
+    I uend = std::next(lower);
+    if ((*lower).x== (*std::next(lower)).x) {
+        ++lower;
+    }
+    I lend = apprHull.end();
+    I mid = std::partition(first, past, [&](P const& r) -> bool {
+        return not betweenPolynomialChains(r, upper, uend, lower, lend);
+    });
+    return mid; 
 }
+
+I prune(I first, I past) {
+    if (std::distance(first, past) < 2) {
+        return past; 
+    }
+    //Step 1
+    std::vector<point> extreme = findExtrema(first, past);
+    std::sort(extreme.begin(), extreme.end());
+    removeDuplicates(extreme);
+    I q = first;
+    for (int i = 0; i != extreme.size(); ++i, ++q) {
+        std::iter_swap(q, extreme[i]);
+    }
+    //Step 2
+    I rest = plane_sweep::solve(first, q); 
+    //Step 3
+    I interior = eliminateInnerPoints(rest, past, first, rest);
+    return interior;
+}
+
+I solve(I first, I past) {
+    I rest = prune(first, past);
+#if defined(PRUNING)
+    prunningEfficiency += std::distance(first, rest);
+
+#endif
+    return plane_sweep::solve(first, rest);
+}
+
+bool check(I first, I past) {
+    using P = I; 
+    using S = std::vector<I>;
+    using J = typename S::iterator;
+    S data;
+
+    std::size_t n = std::distance(first, past);
+    data.resize(n);
+    std::copy(first, past, data.begin());
+    J rest = solve(data.begin(), data.end());
+    bool ok = validation::same_multiset(data.begin(), data.end(), first, past) and validation::convex_polygon(
+        data.begin(), rest) and validation::all_inside(rest, data.end(), data.begin(), rest);
+    return ok;
+    )
+}
+
 // The general idea is, we create classes which inherit the baseclass 
 // and have a additional function, which implements different throwaway tactics.
 struct testPlane : PointPlane {
