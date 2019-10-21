@@ -93,66 +93,85 @@ vector<point> findExtrema(I first, I past) {
         }
         if (get<0>(*i) > xmax) { //Update max x value
             xmax = get<0>(*i);
-            max_position[1] = (*i);
+            max_position[4] = (*i);
         }
         if (get<1>(*i) < ymin) { //Update min y value
             ymin = get<1>(*i);
-            max_position[2] = (*i);
+            max_position[6] = (*i);
         }
         if (get<1>(*i) > ymax) { //Update max y value
             ymax = get<1>(*i);
-            max_position[3] = (*i);    
+            max_position[2] = (*i);    
         }
         int d = get<0>(*i) + get<1>(*i); //Check if north-eastern point
         
         if (d > ne) {
             ne = d; //Update north-eastern point
-            max_position[4] = (*i); 
+            max_position[3] = (*i); 
         }
         d = get<0>(*i) - get<1>(*i); //Check if south-eastern point
         if (d > se) { //Update south-eastern point
             se = d;
             max_position[5] = (*i);
         }
-        d = (get<0>(*i) + get<1>(*i)); //Check if south-western point 
-        if (d < sw) { //Update south-western point
+        d = -(get<0>(*i) + get<1>(*i)); //Check if south-western point 
+        if (d > sw) { //Update south-western point
             sw = d;
-            max_position[6] = (*i);
+            max_position[7] = (*i);
         }
         d = get<1>(*i) - get<0>(*i); //Check if north-western point
         if (d > nw) { //Update north-western point
             nw = d;
-            max_position[7] = (*i);
+            max_position[1] = (*i);
         }
     }
+    for( I Extreme = max_position.begin(); Extreme != max_position.end(); Extreme++){
+
+            std::cout << get<0>(*Extreme)<<  " " << get<1>(*Extreme)<<  "  \n";}
+    // This part removes duplicates:
+    max_position.resize( std::distance( max_position.begin(),std::unique(max_position.begin(),max_position.end())));
+    for( I Extreme = max_position.begin(); Extreme != max_position.end(); Extreme++){
+
+            std::cout << get<0>(*Extreme)<<  " " << get<1>(*Extreme)<<  "  \n";}
     return max_position;
 }   
-vector<point> BasicThrowAway(std::vector<point> p){
+tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
     vector<point> max_position;
     vector<point> RESULT;
     max_position = findExtrema(p.begin(),p.end());
     bool dinmor;
+    int comps = 0;
+    int rounds = 0;
+    int removed = 0;
     for(I iter = p.begin(); iter != p.end(); iter++){
         dinmor = true;
         if (ccw(*prev((max_position.end())), *(max_position.begin()),(*iter))){
-                std::cout << get<0>(*iter) << " ";
-                std::cout << get<1>(*iter) << " Dette er interessant \n";
+                
+        
 
                 RESULT.push_back(*iter);
                 dinmor =false;
+                
         }
+        comps++;
+        rounds = 0;
+        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
+            rounds ++;
+            if (dinmor) {
+                comps++;
+                if ( ccw(*Extreme, *next(Extreme),*iter)){
 
-        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){
-            if (ccw(*Extreme, *next(Extreme),*iter) && dinmor){
-                RESULT.push_back(*iter);
-                std::cout << get<0>(*iter) << " ";
-                std::cout << get<1>(*iter) << " Dette er interessant2 \n";
-                dinmor = false;
+
+
+                    RESULT.push_back(*iter);
+                    dinmor = false;
+                }
             }
         }
+        if (dinmor) {removed ++;}
         
     }
-    return PlaneSweep(RESULT);
+    return {PlaneSweep(RESULT), comps,removed};
 
 }
 
@@ -169,6 +188,7 @@ vector<point> BasicThrowAway(std::vector<point> p){
 // Implement a struct, which contains the convex hull and number of comparisons.
 struct PointPlane {
     int NrComps;
+    int removed;
     vector<point>::iterator ConveXHullstart;
     vector<point>::iterator ConveXHullEnd;
     vector<point> ConveXHull;
@@ -195,8 +215,6 @@ struct PointPlane {
             
             outfile << get<0>(*iter) << " ,";
             outfile << get<1>(*iter) << " \n";
-            std::cout << get<0>(*iter) << " ";
-            std::cout << get<1>(*iter) << " \n";
 
         }
         return 0;
@@ -209,12 +227,15 @@ struct PointPlane {
         for (vector<point>::iterator iter = this->ConveXHull.begin(); iter != this->ConveXHull.end(); iter++){
             outfile << get<0>(*iter) << " ,";
             outfile << get<1>(*iter) << " \n";
-            std::cout << get<0>(*iter) << " ";
-            std::cout << get<1>(*iter) << " \n";
 
         }
         return 0;
     };
+    int GetCompsAndRemoved() {
+        std::cout << "THIS is Nr of Comps " << this->NrComps << "\n";
+        std::cout << "THIS is Nr of removed elements " << this->removed << "\n";
+        return 0;
+    }
 
     int solve () {
         this->ConveXHull = PlaneSweep(this->AllPoints);
@@ -227,9 +248,12 @@ struct PointPlane {
 // #########################################################################
 // ########################### BASIC THROWAWAY##############################
 // #########################################################################
-struct BasicThrowAway : PointPlane {
+struct Base : PointPlane {
     int ThrowAwayHull(){
-        this->ConveXHull = BasicThrowAway(this->AllPoints);
+        tuple<vector<point>,int,int> res = BasicThrowAway(this->AllPoints);
+        this->ConveXHull = get<0>(res);
+        this->NrComps = get<1>(res);
+        this->removed =get<2>(res);
         return 0;
     }
 };
@@ -238,12 +262,12 @@ struct BasicThrowAway : PointPlane {
 
 
 int main() {   
-    BasicThrowAway plane;
-        
-    plane.GeneratePointList(100,100,20);
+    Base plane;
+    plane.GeneratePointList(100,100,100);
     plane.GetPoints();
-    std::cout  << " Dette skal implementeres\n ";
     plane.ThrowAwayHull();
     plane.GetHull();
+    plane.GetCompsAndRemoved();
+    
     return 0;
 }
