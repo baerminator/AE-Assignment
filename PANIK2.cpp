@@ -130,9 +130,6 @@ vector<point> Extrema_8(I first, I past) {
     
     return max_position;
 }   
-
-
-
 tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
     vector<point> max_position;
     vector<point> RESULT;
@@ -162,8 +159,10 @@ tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
 
 }
 
-
-
+tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p){
+    vector<point> max_position;
+    vector<point> RESULT;
+    max_positoin = Extreme_4(p.begin(), p.end());
 
 
 
@@ -228,13 +227,7 @@ tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p){
             dinmor =false;            
         }
         comps++;
-<<<<<<< HEAD
-        rounds = 0;
-        for(I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
-            rounds ++;
-=======
         for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
->>>>>>> a84b8803ce62b7e36aeb86841f314bb940f13c67
             if (dinmor) {
                 comps++;
                 if ( ccw(*Extreme, *next(Extreme),*iter)){
@@ -296,16 +289,6 @@ tuple<vector<point>, int, int> ShoelaceThrowAwayHull(std::vector<point> p){
         if (dinmor) {removed ++;}
     }
     return {PlaneSweep(RESULT), comps,removed};
-
-}
-
-tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p){
-    vector<point> max_position;
-    vector<point> RESULT;
-    max_position = findExtrema(p.begin(), p.end());
-    int comps = 0; 
-    int rounds = 0;
-    int removed = 0;
 
 }
 
