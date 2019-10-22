@@ -71,7 +71,7 @@ std::vector<point> PlaneSweep(std::vector<point> p) {
 // ############################################################################
 
 // Function to find eight extreme points
-vector<point> findExtrema(I first, I past) {
+vector<point> Extrema_8(I first, I past) {
     assert(first != past);
     vector<point> max_position(8, (*first)); //Vector to keep extreme points 
     
@@ -125,14 +125,9 @@ vector<point> findExtrema(I first, I past) {
             max_position[1] = (*i);
         }
     }
-    for( I Extreme = max_position.begin(); Extreme != max_position.end(); Extreme++){
-
-            std::cout << get<0>(*Extreme)<<  " " << get<1>(*Extreme)<<  "  \n";}
     // This part removes duplicates:
     max_position.resize( std::distance( max_position.begin(),std::unique(max_position.begin(),max_position.end())));
-    for( I Extreme = max_position.begin(); Extreme != max_position.end(); Extreme++){
-
-            std::cout << get<0>(*Extreme)<<  " " << get<1>(*Extreme)<<  "  \n";}
+    
     return max_position;
 }   
 
@@ -141,38 +136,164 @@ vector<point> findExtrema(I first, I past) {
 tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
     vector<point> max_position;
     vector<point> RESULT;
-    max_position = findExtrema(p.begin(),p.end());
+    max_position = Extrema_8(p.begin(),p.end());
     bool dinmor;
     int comps = 0;
-    int rounds = 0;
     int removed = 0;
     for(I iter = p.begin(); iter != p.end(); iter++){
         dinmor = true;
         if (ccw(*prev((max_position.end())), *(max_position.begin()),(*iter))){
-                
-        
-
-                RESULT.push_back(*iter);
-                dinmor =false;
-                
+            RESULT.push_back(*iter);
+            dinmor =false;            
         }
         comps++;
-        rounds = 0;
-        for(I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
-            rounds ++;
+        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
             if (dinmor) {
                 comps++;
                 if ( ccw(*Extreme, *next(Extreme),*iter)){
-
-
-
                     RESULT.push_back(*iter);
                     dinmor = false;
                 }
             }
         }
         if (dinmor) {removed ++;}
-        
+    }
+    return {PlaneSweep(RESULT), comps,removed};
+
+}
+
+
+
+
+
+
+
+
+// ############################################################################
+// ######################## SQUARE THROW AWAY #################################
+// ############################################################################
+
+// Function to find eight extreme points
+vector<point> Extrema_4(I first, I past) {
+    assert(first != past);
+    vector<point> max_position(4, (*first)); //Vector to keep extreme points 
+    
+    //Define starting values for the eight extreme points
+    int xmin = get<0>(*first); 
+    int xmax = get<0>(*first);
+    int ymin = get<1>(*first);
+    int ymax = get<1>(*first);
+    int ne = xmin + ymin;
+    int se = xmin - ymin;
+    int sw = -(xmin + ymin);
+    int nw = ymin - xmin;
+
+    I i; 
+    for (i = first; i != past; ++i) { //Iterate over each point in the convex hull
+        if (get<0>(*i) < xmin) { //Update min x value 
+            xmin = get<0>(*i); 
+            max_position[0] = (*i);
+        }
+        if (get<0>(*i) > xmax) { //Update max x value
+            xmax = get<0>(*i);
+            max_position[2] = (*i);
+        }
+        if (get<1>(*i) < ymin) { //Update min y value
+            ymin = get<1>(*i);
+            max_position[3] = (*i);
+        }
+        if (get<1>(*i) > ymax) { //Update max y value
+            ymax = get<1>(*i);
+            max_position[1] = (*i);    
+        }
+    }
+    for (I iter = max_position.begin(); iter != max_position.end(); iter ++){
+        std::cout << get<0>(*iter) << " " << get<1>(*iter) << "\n";
+    }
+    // This part removes duplicates:get<0>(*iter)
+    max_position.resize( std::distance( max_position.begin(),std::unique(max_position.begin(),max_position.end())));
+    return max_position;
+}   
+tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p){
+    vector<point> max_position;
+    vector<point> RESULT;
+    max_position = Extrema_4(p.begin(),p.end());
+    bool dinmor;
+    int comps = 0;
+    int removed = 0;
+    for(I iter = p.begin(); iter != p.end(); iter++){
+        dinmor = true;
+        if (ccw(*prev((max_position.end())), *(max_position.begin()),(*iter))){
+            RESULT.push_back(*iter);
+            dinmor =false;            
+        }
+        comps++;
+<<<<<<< HEAD
+        rounds = 0;
+        for(I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
+            rounds ++;
+=======
+        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
+>>>>>>> a84b8803ce62b7e36aeb86841f314bb940f13c67
+            if (dinmor) {
+                comps++;
+                if ( ccw(*Extreme, *next(Extreme),*iter)){
+                    RESULT.push_back(*iter);
+                    dinmor = false;
+                }
+            }
+        }
+        if (dinmor) {removed ++;}
+    }
+    return {PlaneSweep(RESULT), comps,removed};
+
+}
+
+
+
+// #############################################################################
+// ######################### Shoelace Throwaway ################################
+// #############################################################################
+// Function to find eight extreme points
+point calcCenter(I first, I last ){
+    float x = 0;
+    float y = 0;
+    float n = 0;
+    for (I iter = first; iter != last; iter ++){
+        x += get<0>(*iter);
+        y += get<1>(*iter);
+        n++;
+    }
+    x = x/n;
+    y = y/n;
+    return make_pair((int)x,(int)y);
+}   
+tuple<vector<point>, int, int> ShoelaceThrowAwayHull(std::vector<point> p){
+    vector<point> max_position;
+    vector<point> RESULT;
+    max_position = Extrema_4(p.begin(),p.end());
+    bool dinmor;
+    int comps = 0;
+    int removed = 0;
+    int Shoelace = 0;
+    point center = calcCenter(max_position.begin(),max_position.end());
+    for(I iter = p.begin(); iter != p.end(); iter++){
+        dinmor = true;
+        if (ccw(*prev((max_position.end())), *(max_position.begin()),(*iter))){
+            RESULT.push_back(*iter);
+            dinmor =false;            
+        }
+        comps++;
+        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
+            if (dinmor) {
+                comps++;
+                if ( ccw(*Extreme, *next(Extreme),*iter)){
+                    RESULT.push_back(*iter);
+                    dinmor = false;
+                }
+            }
+        }
+        if (dinmor) {removed ++;}
     }
     return {PlaneSweep(RESULT), comps,removed};
 
@@ -261,7 +382,7 @@ struct PointPlane {
 // #########################################################################
 // ########################### BASIC THROWAWAY##############################
 // #########################################################################
-struct Base : PointPlane {
+struct BaseHull : PointPlane {
     int ThrowAwayHull(){
         tuple<vector<point>,int,int> res = BasicThrowAway(this->AllPoints);
         this->ConveXHull = get<0>(res);
@@ -272,10 +393,25 @@ struct Base : PointPlane {
 };
 
 // ###############################################################
+// ########################## SQUARE ThrowAWAY ####################
+// ###############################################################
+struct SquareHull : PointPlane {
+    int ThrowAwayHull(){
+        tuple<vector<point>,int,int> res = SquareThrowAway(this->AllPoints);
+        this->ConveXHull = get<0>(res);
+        this->NrComps = get<1>(res);
+        this->removed =get<2>(res);
+        return 0;
+    }
+};
+
+
+
+
 
 
 int main() {   
-    Base plane;
+    BaseHull plane;
     plane.GeneratePointList(100,100,100);
     plane.GetPoints();
     plane.ThrowAwayHull();
