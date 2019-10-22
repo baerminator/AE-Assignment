@@ -214,6 +214,7 @@ tuple<vector<point>, int, int> CirclePrune(std::vector<point> Points, point Cent
     int removed = 0;
     double Radius2  = pow(Radius,2);
     for(I iter = Points.begin(); iter != Points.end(); iter++){
+        comps++;
         if (pow((double)(get<0>(*iter) - (double)get<0>(Centrum)),2) + 
             pow(((double)get<1>(*iter) - (double)get<1>(Centrum)),2) > Radius2  ){
             RESULT.push_back(*iter);            
@@ -263,6 +264,8 @@ tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p){
 tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p) {
     vector<point> max_position = Extrema_4(p.begin(), p.end());
     tuple<vector<point>, int, int> RESULT;
+    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
+    
 }
 
 // #############################################################################
