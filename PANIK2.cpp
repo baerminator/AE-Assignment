@@ -135,6 +135,9 @@ vector<point> findExtrema(I first, I past) {
             std::cout << get<0>(*Extreme)<<  " " << get<1>(*Extreme)<<  "  \n";}
     return max_position;
 }   
+
+
+
 tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
     vector<point> max_position;
     vector<point> RESULT;
@@ -155,7 +158,7 @@ tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
         }
         comps++;
         rounds = 0;
-        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
+        for(I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
             rounds ++;
             if (dinmor) {
                 comps++;
@@ -172,6 +175,16 @@ tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
         
     }
     return {PlaneSweep(RESULT), comps,removed};
+
+}
+
+tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p){
+    vector<point> max_position;
+    vector<point> RESULT;
+    max_position = findExtrema(p.begin(), p.end());
+    int comps = 0; 
+    int rounds = 0;
+    int removed = 0;
 
 }
 
