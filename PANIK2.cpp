@@ -14,61 +14,16 @@
 
 #include <algorithm>
 #include <fstream>
-
-
-//############################################################################################### 
-//########################## SIMPLE PlANESWEEP ################################################
-//###############################################################################################
-
-// maybe implement inplace algorithm <3 
-
 using namespace std;
 typedef std::tuple<int, int> point;
 typedef vector<point>::iterator I;
 typedef vector<point> VP;
 
-// returns true if the three points make a counter-clockwise turn
-bool ccw(const point& a, const point& b, const point& c) {
-    return ((std::get<0>(b) - std::get<0>(a)) * (std::get<1>(c) - std::get<1>(a)))
-         > ((std::get<1>(b) - std::get<1>(a)) * (std::get<0>(c) - std::get<0>(a)));
-}
-
-//Performs X sort ( maybe implement lexicographical sorting)
-std::vector<point> PlaneSweep(std::vector<point> p) {
-    if (p.size() == 0) return std::vector<point>();
-    std::sort(p.begin(), p.end(), [](point& a, point& b){
-        if (std::get<0>(a) < std::get<0>(b)) return true;
-        return false;
-    });
-    
-    std::vector<point> RESULT;
- 
-    // lower hull
-    for (const auto& pt : p) {
-        while (RESULT.size() >= 2 && !ccw(RESULT.at(RESULT.size() - 2), RESULT.at(RESULT.size() - 1), pt)) {
-            RESULT.pop_back();
-        }
-        RESULT.push_back(pt);
-    }
- 
-    // upper hull
-    auto t = RESULT.size() + 1;
-    for (auto it = p.crbegin(); it != p.crend(); it = std::next(it)) {
-        auto pt = *it;
-        while (RESULT.size() >= t && !ccw(RESULT.at(RESULT.size() - 2), RESULT.at(RESULT.size() - 1), pt)) {
-            RESULT.pop_back();
-        }
-        RESULT.push_back(pt);
-    }
- 
-    RESULT.pop_back();
-    return RESULT;
-}
+// ############################################################################################
+// ######################### Extrema ##########################################################
+// ############################################################################################
 
 
-// ############################################################################
-// ######################## SIMPLE THROW AWAY #################################
-// ############################################################################
 
 // Function to find eight extreme points
 vector<point> Extrema_8(I first, I past) {
@@ -129,35 +84,8 @@ vector<point> Extrema_8(I first, I past) {
     max_position.resize( std::distance( max_position.begin(),std::unique(max_position.begin(),max_position.end())));
     
     return max_position;
-}   
-tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
-    vector<point> max_position;
-    vector<point> RESULT;
-    max_position = Extrema_8(p.begin(),p.end());
-    bool dinmor;
-    int comps = 0;
-    int removed = 0;
-    for(I iter = p.begin(); iter != p.end(); iter++){
-        dinmor = true;
-        if (ccw(*prev((max_position.end())), *(max_position.begin()),(*iter))){
-            RESULT.push_back(*iter);
-            dinmor =false;            
-        }
-        comps++;
-        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
-            if (dinmor) {
-                comps++;
-                if ( ccw(*Extreme, *next(Extreme),*iter)){
-                    RESULT.push_back(*iter);
-                    dinmor = false;
-                }
-            }
-        }
-        if (dinmor) {removed ++;}
-    }
-    return {PlaneSweep(RESULT), comps,removed};
-
 }
+<<<<<<< HEAD
 
 tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p){
     vector<point> max_position;
@@ -172,6 +100,8 @@ tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p){
 // ######################## SQUARE THROW AWAY #################################
 // ############################################################################
 
+=======
+>>>>>>> c43746b25cc1135604853700938ba5c8ce1e4129
 // Function to find eight extreme points
 vector<point> Extrema_4(I first, I past) {
     assert(first != past);
@@ -212,7 +142,101 @@ vector<point> Extrema_4(I first, I past) {
     // This part removes duplicates:get<0>(*iter)
     max_position.resize( std::distance( max_position.begin(),std::unique(max_position.begin(),max_position.end())));
     return max_position;
-}   
+}
+
+
+//############################################################################################### 
+//########################## SIMPLE PlANESWEEP ################################################
+//###############################################################################################
+
+// maybe implement inplace algorithm <3 
+
+
+
+// returns true if the three points make a counter-clockwise turn
+bool ccw(const point& a, const point& b, const point& c) {
+    return ((std::get<0>(b) - std::get<0>(a)) * (std::get<1>(c) - std::get<1>(a)))
+         > ((std::get<1>(b) - std::get<1>(a)) * (std::get<0>(c) - std::get<0>(a)));
+}
+
+//Performs X sort ( maybe implement lexicographical sorting)
+std::vector<point> PlaneSweep(std::vector<point> p) {
+    if (p.size() == 0) return std::vector<point>();
+    std::sort(p.begin(), p.end(), [](point& a, point& b){
+        if (std::get<0>(a) < std::get<0>(b)) return true;
+        return false;
+    });
+    
+    std::vector<point> RESULT;
+ 
+    // lower hull
+    for (const auto& pt : p) {
+        while (RESULT.size() >= 2 && !ccw(RESULT.at(RESULT.size() - 2), RESULT.at(RESULT.size() - 1), pt)) {
+            RESULT.pop_back();
+        }
+        RESULT.push_back(pt);
+    }
+ 
+    // upper hull
+    auto t = RESULT.size() + 1;
+    for (auto it = p.crbegin(); it != p.crend(); it = std::next(it)) {
+        auto pt = *it;
+        while (RESULT.size() >= t && !ccw(RESULT.at(RESULT.size() - 2), RESULT.at(RESULT.size() - 1), pt)) {
+            RESULT.pop_back();
+        }
+        RESULT.push_back(pt);
+    }
+ 
+    RESULT.pop_back();
+    return RESULT;
+}
+
+
+// ############################################################################
+// ######################## SIMPLE THROW AWAY #################################
+// ############################################################################
+   
+tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
+    vector<point> max_position;
+    vector<point> RESULT;
+    max_position = Extrema_8(p.begin(),p.end());
+    bool dinmor;
+    int comps = 0;
+    int removed = 0;
+    for(I iter = p.begin(); iter != p.end(); iter++){
+        dinmor = true;
+        if (ccw(*prev((max_position.end())), *(max_position.begin()),(*iter))){
+            RESULT.push_back(*iter);
+            dinmor =false;            
+        }
+        comps++;
+        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
+            if (dinmor) {
+                comps++;
+                if ( ccw(*Extreme, *next(Extreme),*iter)){
+                    RESULT.push_back(*iter);
+                    dinmor = false;
+                }
+            }
+        }
+        if (dinmor) {removed ++;}
+    }
+    return {PlaneSweep(RESULT), comps,removed};
+
+}
+
+
+
+
+
+
+
+
+// ############################################################################
+// ######################## SQUARE THROW AWAY #################################
+// ############################################################################
+
+   
 tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p){
     vector<point> max_position;
     vector<point> RESULT;
