@@ -1,4 +1,3 @@
-
 #include <algorithm>
 #include <iostream>
 #include <ostream>
@@ -11,7 +10,7 @@
 
 #include <cassert>
 #include <iterator>
-
+#include <cmath>
 #include <algorithm>
 #include <fstream>
 using namespace std;
@@ -133,7 +132,11 @@ vector<point> Extrema_8(I first, I past) {
     
     return max_position;
 }
-// Function to find eight extreme points
+
+// ############################################################################
+// ######################## SQUARE THROW AWAY #################################
+// ############################################################################
+
 vector<point> Extrema_4(I first, I past) {
     assert(first != past);
     vector<point> max_position(4, (*first)); //Vector to keep extreme points 
@@ -205,6 +208,24 @@ tuple<vector<point>, int, int> Prune(std::vector<point> Points, std::vector<poin
     return {PlaneSweep(RESULT), comps,removed};
 }
 
+tuple<vector<point>, int, int> CirclePrune(std::vector<point> Points, point Centrum, float Radius ){
+    vector<point> RESULT;
+    int comps = 0;
+    int removed = 0;
+    double Radius2  = pow(Radius,2);
+    for(I iter = Points.begin(); iter != Points.end(); iter++){
+        if (pow((double)(get<0>(*iter) - (double)get<0>(Centrum)),2) + 
+            pow(((double)get<1>(*iter) - (double)get<1>(Centrum)),2) > Radius2  ){
+            RESULT.push_back(*iter);            
+        }        
+        else {removed ++;}
+    }
+    return {PlaneSweep(RESULT), comps,removed};
+}
+
+
+
+
 
 
 
@@ -221,13 +242,6 @@ tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p){
 
 }
 
-
-
-
-
-
-
-
 // ############################################################################
 // ######################## SQUARE THROW AWAY #################################
 // ############################################################################
@@ -242,6 +256,14 @@ tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p){
 }
 
 
+// #############################################################################
+// ######################### CIRCLE THROWAWAY ##################################
+// #############################################################################
+
+tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p) {
+    vector<point> max_position = Extrema_4(p.begin(), p.end());
+    tuple<vector<point>, int, int> RESULT;
+}
 
 // #############################################################################
 // ######################### Shoelace Throwaway ################################
@@ -386,11 +408,6 @@ struct SquareHull : PointPlane {
         return 0;
     }
 };
-
-
-
-
-
 
 int main() {   
     SquareHull plane;
