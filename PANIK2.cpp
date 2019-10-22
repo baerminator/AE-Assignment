@@ -4,7 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <iostream>
-
+#include <math.h>
 #include <vector> 
 #include <stdlib.h>
 
@@ -12,6 +12,7 @@
 #include <iterator>
 #include <cmath>
 #include <algorithm>
+#include <random>
 #include <fstream>
 using namespace std;
 typedef std::tuple<int, int> point;
@@ -127,6 +128,11 @@ vector<point> Extrema_8(I first, I past) {
             max_position[1] = (*i);
         }
     }
+    
+    std::cout <<"Max Positions are \n";
+    for (I iter = max_position.begin(); iter != max_position.end(); iter ++){
+        std::cout << get<0>(*iter) << " " << get<1>(*iter) << "\n";
+    }
     // This part removes duplicates:
     max_position.resize( std::distance( max_position.begin(),std::unique(max_position.begin(),max_position.end())));
     
@@ -170,6 +176,7 @@ vector<point> Extrema_4(I first, I past) {
             max_position[1] = (*i);    
         }
     }
+    std::cout <<"Max Positions are \n";
     for (I iter = max_position.begin(); iter != max_position.end(); iter ++){
         std::cout << get<0>(*iter) << " " << get<1>(*iter) << "\n";
     }
@@ -294,24 +301,6 @@ tuple<vector<point>, int, int> ShoelaceThrowAwayHull(std::vector<point> p){
     int removed = 0;
     int Shoelace = 0;
     point center = calcCenter(max_position.begin(),max_position.end());
-    for(I iter = p.begin(); iter != p.end(); iter++){
-        dinmor = true;
-        if (ccw(*prev((max_position.end())), *(max_position.begin()),(*iter))){
-            RESULT.push_back(*iter);
-            dinmor =false;            
-        }
-        comps++;
-        for( I Extreme = max_position.begin(); Extreme != prev(max_position.end()); Extreme++){        
-            if (dinmor) {
-                comps++;
-                if ( ccw(*Extreme, *next(Extreme),*iter)){
-                    RESULT.push_back(*iter);
-                    dinmor = false;
-                }
-            }
-        }
-        if (dinmor) {removed ++;}
-    }
     return {PlaneSweep(RESULT), comps,removed};
 
 }
@@ -334,19 +323,58 @@ struct PointPlane {
     vector<point>::iterator ConveXHullEnd;
     vector<point> ConveXHull;
     vector<point> AllPoints;
-    
-    // Fix stupid off by two hack <3 
-    int GeneratePointList (int RangeX,int RangeY, int n){
 
+    int GenerateSquarePoints (int RangeX,int RangeY, int n){
+        unsigned seed = 0;
+        std::default_random_engine gen (seed);
+        std::uniform_int_distribution<int> uniform_dist_X(0, RangeX);
+        std::uniform_int_distribution<int> uniform_dist_Y(0, RangeY);
         vector<point> points;
         for ( int i = 1; i <= n  ; i++){
-            int x = rand() % RangeX + 1;
-            int y = rand() % RangeY + 1;
+            int x = uniform_dist_X(gen);
+            int y = uniform_dist_Y(gen);
             point p = make_pair(x,y);   
             this->AllPoints.push_back(p);
         };
         return 0;
     };
+    int GenerateCirclePoints (int Radius, int n){
+        unsigned seed = 0;
+        std::default_random_engine gen (seed);
+        std::uniform_int_distribution<int> RanInt(-Radius, Radius);
+        vector<point> points;
+        for ( int i = 1; i <= n  ; i++){
+            int x = RanInt(gen);
+            int y = RanInt(gen);
+            while ( pow(x,2) + pow(y,2) > Radius ){
+                x = RanInt(gen);
+                y = RanInt(gen);
+            }
+            point p = make_pair(x,y);   
+            this->AllPoints.push_back(p);
+        };
+        return 0;
+    };
+    int GenerateCirclePoints2 (int Radius, int n){
+        unsigned seed = 0;
+        std::default_random_engine gen (seed);
+        std::uniform_real_distribution<> uniform_dist_Radius(-(float)Radius, (float)Radius);
+        std::uniform_real_distribution<> Angle(0.0, 1.0);
+        vector<point> points;
+        for ( int i = 1; i <= n  ; i++){
+            float r = uniform_dist_Radius(gen);
+            float theta = Angle(gen) * 2 * M_PI;
+            int x = r * cos(theta);
+            int y = r * sin(theta);
+            point p = make_pair(x,y);   
+            this->AllPoints.push_back(p);
+        };
+        return 0;
+    };
+
+
+
+
     int GetPoints (){
         vector<point>::iterator iter;
         std::ofstream outfile;
@@ -358,6 +386,7 @@ struct PointPlane {
             outfile << get<1>(*iter) << " \n";
 
         }
+        outfile.close();
         return 0;
     };
     int GetHull (){
@@ -370,6 +399,7 @@ struct PointPlane {
             outfile << get<1>(*iter) << " \n";
 
         }
+        outfile.close();
         return 0;
     };
     int GetCompsAndRemoved() {
@@ -414,11 +444,19 @@ struct SquareHull : PointPlane {
 
 int main() {   
     SquareHull plane;
-    plane.GeneratePointList(100,100,100);
+    BaseHull plane2;
+    // plane.GenerateSquarePoints(100,100,100);
+    plane.GenerateCirclePoints(10000,1000);
     plane.GetPoints();
     plane.ThrowAwayHull();
     plane.GetHull();
     plane.GetCompsAndRemoved();
+    plane2.GenerateCirclePoints(10000,1000);
+    plane2.GetPoints();
+    plane2.ThrowAwayHull();
+    plane2.GetHull();
+    plane2.GetCompsAndRemoved();
+
     
     return 0;
 }
