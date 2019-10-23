@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <random>
 #include <fstream>
+
+#define _USE_MATH_DEFINES
 using namespace std;
 typedef std::tuple<int, int> point;
 typedef vector<point>::iterator I;
@@ -384,8 +386,8 @@ tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p)
 // ######################### CIRCLE THROWAWAY ##################################
 // #############################################################################
 
-
-tuple<double, double, double> circleInTri(vector<point> p) {
+//Given three points, find best incircle
+tuple<double, double, double, double> circleInTri(vector<point> p) {
     vector<int> xCoords, yCoords;
     for (std::size_t i = 0; i != p.size(); i++) {
         xCoords.push_back(get<0>(p[i]));
@@ -400,38 +402,146 @@ tuple<double, double, double> circleInTri(vector<point> p) {
     cout << "r is:\n" << r << "\n";
     double x_c = (a*xCoords[0]+b*xCoords[1]+c*xCoords[2])/(a+b+c);
     double y_c = (a*yCoords[0]+b*yCoords[1]+c*yCoords[2])/(a+b+c);
-    tuple<double, double, double> RESULT = {x_c, y_c, r};
+    double A = M_PI*pow(r, 2.0);
+    tuple<double, double, double, double> RESULT = {x_c, y_c, r, A};
     cout << get<0>(RESULT) << "\n";
     cout << get<1>(RESULT) << "\n";
     cout << get<2>(RESULT) << "\n";
+    cout << get<3>(RESULT) << "\n";
     return RESULT;
 }
 
-tuple<double, double, double> circleThing(std::vector<point> p) {
-    vector<point> max_position = Extrema_4(p.begin(), p.end()); 
+//Find largest incircle in rectangle
+tuple<double, double, double, double> isRectangle(std::vector<int> xCoords) {
+    double x_c = (xCoords[3] - xCoords[0])/2;
+    double y_c = (xCoords[1] - xCoords[0])/2;
+    double r = x_c - xCoords[0];
+    double a = M_PI*pow(r,2.0);
+    tuple<double, double, double, double> RESULT = {x_c, y_c, r, a};
+    cout << "Rectangle with following incircle:\n";
+    cout << "Center in:" << get<0>(RESULT) << get<1>(RESULT) << "Radius: " << get<2>(RESULT) << "\n";
+    return RESULT;
+}
+
+//Find largest incircle in Rhomba
+tuple<double, double, double, double> isRhombus(std::vector<int> xCoords, std::vector<int> yCoords) {
+    
+
+}
+
+//Find largest incircle in Parallelogram 
+tuple<double, double, double, double> isParallelogram(std::vector<int> xCoords, std::vector<int> yCoords) {
+
+}
+
+//MISSING: Find incircle of parallelogram and Rhomba (Possible?)
+//PROBLEM: Is Incircle in rectangle correct? 
+//PROBLEM: Both pairs of opposite sides are none-parallel. Compute all triangles (?)
+tuple<double, double, double, double> circleThing(std::vector<point> p) {
+    vector<point> max_position = Extrema_4(p.begin(), p.end()); //Find four extreme points
+    //The following is used to find number of unique points in vector of extreme points
     vector<int> xCoords, yCoords;
-    for (std::size_t i = 0; i < max_position.size(); i++) {
-        xCoords.push_back(get<0>(max_position[i]));
-        yCoords.push_back(get<1>(max_position[i]));
-    }
-    if (xCoords[0] == xCoords[1] && xCoords[2] == xCoords[3]) {
-        double x_c = get<0>(max_position[3]) - (get<0>(max_position[0])/2);
-        double y_c = get<1>(max_position[1]) - (get<1>(max_position[0])/2);
-        double r = x_c - get<0>(max_position[0]);
-        tuple<double, double, double> RESULT = {x_c, y_c, r};
-        cout << "Perfect square with following incircle:\n";
-        cout << "Center in:" << get<0>(RESULT) << get<1>(RESULT) << "Radius: " << get<2>(RESULT) << "\n";
-        return RESULT;
-    }
     vector<point> max_positionSort = max_position;
     std::sort(max_positionSort.begin(), max_positionSort.end());
     I ui = std::unique(max_positionSort.begin(), max_positionSort.end());
     max_positionSort.resize(std::distance(max_positionSort.begin(), ui));
-    if (max_positionSort.size() == 3) {
+    if (max_positionSort.size() == 3) { //There are only three extreme points, find incircle in the triangle
         return circleInTri(max_positionSort);
     }
-    
+    for (std::size_t i = 0; i < max_position.size(); i++) {
+        xCoords.push_back(get<0>(max_position[i]));
+        yCoords.push_back(get<1>(max_position[i]));
+    }
+    if (xCoords[0] == xCoords[1] && xCoords[2] == xCoords[3]) { //Four points form a rectangle
+        return isRectangle(xCoords);
+    }
+    //Find length of four sides
+    double AB = sqrt(pow((double) xCoords[0]-xCoords[1], 2.0) + pow((double) yCoords[0]-yCoords[1], 2.0));
+    double BC = sqrt(pow((double) xCoords[1]-xCoords[2], 2.0) + pow((double) yCoords[1]-yCoords[2], 2.0));
+    double CD = sqrt(pow((double) xCoords[2]-xCoords[3], 2.0) + pow((double) yCoords[2]-yCoords[3], 2.0));
+    double DA = sqrt(pow((double) xCoords[3]-xCoords[0], 2.0) + pow((double) yCoords[3]-yCoords[0], 2.0));
+    if ((AB == BC) && (AB == CD) && (AB == DA)) {//All four sides are equal in length - shape is a rhombus
+        return isRhombus(xCoords, yCoords);
+    }
+    if ((AB == CD) && (DA == BC)) { //Opposite sides equal in length- parallelogram (and not rhombus as it is tested above)
+        return isParallelogram(xCoords, yCoords);
+    }
+    //Now, at least two sides are none-parallel. Find sides which are none-parallel
+    //Two sides are none-parallel, if they have different slopes
+    //Avoid dividing by zero or getting zero-slope by checking equality of coordinates
+    double AB_Slope, BC_Slope, CD_Slope, DA_Slope;
+    if (yCoords[0] != yCoords[1] && xCoords[0] != xCoords[1]) {
+        AB_Slope = abs((yCoords[0]-yCoords[1])/(xCoords[0]-xCoords[1]));
+    }
+    if (yCoords[1] != yCoords[2] && xCoords[1] != xCoords[2]) {
+        BC_Slope = abs((yCoords[1]-yCoords[2])/(xCoords[1]-xCoords[2]));
+    }
+    if (yCoords[2] != yCoords[3] && xCoords[2] != xCoords[3]) {
+        CD_Slope = abs((yCoords[3]-yCoords[2])/(xCoords[3]-xCoords[2]));
+    }
+    if (yCoords[3] != yCoords[0] && xCoords[3] != xCoords[0]) {
+        DA_Slope = abs((yCoords[3]-yCoords[0])/(xCoords[3]-xCoords[0]));
+    }
+    //Opposite sides AB and CD must collide if different slopes
+    if (AB_Slope != CD_Slope && BC_Slope == DA_Slope) { //Find point of collision x_p through determinant
+        double x_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(xCoords[2]-xCoords[3])
+        -(xCoords[0]-xCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
+        (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
+        //Find incircle of triangle spanned by points A, B and x_p
+        double y_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(yCoords[2]-yCoords[3])
+        -(yCoords[0]-yCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
+        (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
+        point P = std::make_tuple((int)x_p, (int)y_p);
+        //Either triangle AB, AP, BP or triangle CD, CP, PD has largest are. Find this triangle with the largest area
+        //Make two vectors, each consisting of points mentioned in above comment
+        vector<point> p1, p2;
+        for (std::size_t i = 0; i < 2; i++) {
+            p1.push_back(std::make_tuple(xCoords[i], yCoords[i]));
+            p2.push_back(std::make_tuple(xCoords[i+2], yCoords[i+2]));
+        } 
+        p1.push_back(P);
+        p2.push_back(P);
+        tuple<double, double, double, double> Circle1 = circleInTri(p1);
+        tuple<double, double, double, double> Circle2 = circleInTri(p2);
+        if (get<3>(Circle1) > get<3>(Circle2)) {
+            return Circle1;
+        }
+        else {
+            return Circle2;
+        }
+    }
+    //Opposite sides BC And DA are none-parallel and intersect
+    if (BC_Slope != DA_Slope && AB_Slope == CD_Slope) {
+        double x_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(xCoords[3]-xCoords[4])
+        -(xCoords[1]-xCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
+        (xCoords[1]-xCoords[2]*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
+        //Find incircle of triangle spanned by points A, B and x_p
+        double y_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(yCoords[3]-yCoords[4])
+        -(yCoords[1]-yCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
+        (xCoords[1]-xCoords[2]*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
+        point P = std::make_tuple((int)x_p, (int)y_p);
+        //Either triangle AB, AP, BP or triangle CD, CP, PD has largest are. Find this triangle with the largest area
+        //Make two vectors, each consisting of points mentioned in above comment
+        vector<point> p1, p2;
+        for (std::size_t i = 1; i < 3; i++) {
+            p1.push_back(std::make_tuple(xCoords[i], yCoords[i]));
+            p2.push_back(std::make_tuple(xCoords[4-4*(i-1)], yCoords[4-4*(i-1)])); //4-4*(i-1) = 4 when i = 1 and 0 when i=2
+        } 
+        p1.push_back(P);
+        p2.push_back(P);
+        tuple<double, double, double, double> Circle1 = circleInTri(p1);
+        tuple<double, double, double, double> Circle2 = circleInTri(p2);
+        if (get<3>(Circle1) > get<3>(Circle2)) {
+            return Circle1;
+        }
+        else {
+            return Circle2;
+        }
+    }
+    //All opposite sides are pair-wise none-parallel (Thus four triangles possible)
+    if (AB_Slope != CD_Slope && BC_Slope != DA_Slope) {
 
+    }
 }
 
 tuple<double, double, double> ApproxCircle(std::vector<point> p)
