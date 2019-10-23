@@ -503,7 +503,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         p2.push_back(P);
         tuple<double, double, double, double> Circle1 = circleInTri(p1);
         tuple<double, double, double, double> Circle2 = circleInTri(p2);
-        if (get<3>(Circle1) > get<3>(Circle2)) {
+        if (get<3>(Circle1) > get<3>(Circle2)) { //Return circle with largest area
             return Circle1;
         }
         else {
@@ -591,8 +591,6 @@ tuple<double, double, double> ApproxCircle(std::vector<point> p)
     cout << radius; 
     return RESULT;
 }
-
-
 
 tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p)
 {
