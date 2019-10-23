@@ -7,7 +7,6 @@
 #include <math.h>
 #include <vector> 
 #include <stdlib.h>
-
 #include <cassert>
 #include <iterator>
 #include <cmath>
@@ -292,14 +291,63 @@ tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p)
 // ######################### CIRCLE THROWAWAY ##################################
 // #############################################################################
 
+tuple<double, double, double> circleInTri(vector<point> p) {
+    vector<int> xCoords, yCoords;
+    for (std::size_t i = 0; i != p.size(); i++) {
+        xCoords.push_back(get<0>(p[i]));
+        yCoords.push_back(get<1>(p[i]));
+    }
+    double a = sqrt(pow((double) xCoords[1]-xCoords[2], 2.0) + pow((double) yCoords[1]-yCoords[2], 2.0));
+    double b = sqrt(pow((double) xCoords[0]-xCoords[2], 2.0) + pow((double) yCoords[0]-yCoords[2], 2.0));
+    double c = sqrt(pow((double) xCoords[0]-xCoords[1], 2.0) + pow((double) yCoords[0]-yCoords[1], 2.0));
+    double s = (a+b+c)/2;
+    cout << "abc is:" << a << " " << b << " " << c << " ";
+    double r = sqrt(s*(s-a)*(s-b)*(s-c))/s;
+    cout << "r is:\n" << r << "\n";
+    double x_c = (a*xCoords[0]+b*xCoords[1]+c*xCoords[2])/(a+b+c);
+    double y_c = (a*yCoords[0]+b*yCoords[1]+c*yCoords[2])/(a+b+c);
+    tuple<double, double, double> RESULT = {x_c, y_c, r};
+    cout << get<0>(RESULT) << "\n";
+    cout << get<1>(RESULT) << "\n";
+    cout << get<2>(RESULT) << "\n";
+    return RESULT;
+}
+
+tuple<double, double, double> circleThing(std::vector<point> p) {
+    vector<point> max_position = Extrema_4(p.begin(), p.end()); 
+    vector<int> xCoords, yCoords;
+    for (std::size_t i = 0; i < max_position.size(); i++) {
+        xCoords.push_back(get<0>(max_position[i]));
+        yCoords.push_back(get<1>(max_position[i]));
+    }
+    if (xCoords[0] == xCoords[1] && xCoords[2] == xCoords[3]) {
+        double x_c = get<0>(max_position[3]) - (get<0>(max_position[0])/2);
+        double y_c = get<1>(max_position[1]) - (get<1>(max_position[0])/2);
+        double r = x_c - get<0>(max_position[0]);
+        tuple<double, double, double> RESULT = {x_c, y_c, r};
+        cout << "Perfect square with following incircle:\n";
+        cout << "Center in:" << get<0>(RESULT) << get<1>(RESULT) << "Radius: " << get<2>(RESULT) << "\n";
+        return RESULT;
+    }
+    vector<point> max_positionSort = max_position;
+    std::sort(max_positionSort.begin(), max_positionSort.end());
+    I ui = std::unique(max_positionSort.begin(), max_positionSort.end());
+    max_positionSort.resize(std::distance(max_positionSort.begin(), ui));
+    if (max_positionSort.size() == 3) {
+        return circleInTri(max_positionSort);
+    }
+    
+
+}
+
 tuple<double, double, double> ApproxCircle(std::vector<point> p)
 {
     vector<point> max_position = Extrema_8(p.begin(), p.end());
     vector<int> xCoords, yCoords;
     vector <double> uVals, vVals, u2Vals, v2Vals, u3Vals, v3Vals, uvVals, uvvVals, vuuVals;
     for (std::size_t i = 0; i < max_position.size(); i++) {
-        xCoords.push_back((double)get<0>(max_position[i]));
-        yCoords.push_back((double)get<1>(max_position[i]));
+        xCoords.push_back(get<0>(max_position[i]));
+        yCoords.push_back(get<1>(max_position[i]));
     }
     double xMean = (std::accumulate(xCoords.begin(), xCoords.end(), 0)) / max_position.size();
     double yMean = (std::accumulate(yCoords.begin(), yCoords.end(), 0)) / max_position.size();
@@ -339,6 +387,8 @@ tuple<double, double, double> ApproxCircle(std::vector<point> p)
     cout << radius; 
     return RESULT;
 }
+
+
 
 tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p)
 {
@@ -526,6 +576,7 @@ int main()
 {
     SquareHull plane;
     BaseHull plane2;
+    BaseHull plane3;
     // plane.GenerateSquarePoints(100,100,100);
     plane.GenerateCirclePoints(10000,1000);
     plane.GetPoints();
@@ -537,7 +588,11 @@ int main()
     plane2.ThrowAwayHull();
     plane2.GetHull();
     plane2.GetCompsAndRemoved();
-
-    
+    vector<point> p;
+    p.push_back(std::make_tuple(0, 0));
+    p.push_back(std::make_tuple(0,1));
+    p.push_back(std::make_tuple(1,1));
+    p.push_back(std::make_tuple(1,0));
+    circleThing(p);
     return 0;
 }
