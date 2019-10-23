@@ -7,6 +7,12 @@
 #include <math.h>
 #include <vector> 
 #include <stdlib.h>
+#include <limits>
+//#include<boost/shared_ptr.hpp>
+//#include<CGAL/Polygon_2.h>
+//#include<CGAL/create_straight_skeleton_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_2.h>
 
 #include <cassert>
 #include <iterator>
@@ -139,10 +145,6 @@ vector<point> Extrema_8(I first, I past) {
     return max_position;
 }
 
-// ############################################################################
-// ######################## SQUARE THROW AWAY #################################
-// ############################################################################
-
 vector<point> Extrema_4(I first, I past) {
     assert(first != past);
     vector<point> max_position(4, (*first)); //Vector to keep extreme points 
@@ -184,6 +186,78 @@ vector<point> Extrema_4(I first, I past) {
     max_position.resize( std::distance( max_position.begin(),std::unique(max_position.begin(),max_position.end())));
     return max_position;
 }
+
+/*tuple<point, int> InCircle (vector<point> Extrema){
+    //typedef CGAL::Exact_predicates_inexact_constructions_kernel K ;
+    typedef K::Point_2                   altPoint ;
+    //typedef CGAL::Polygon_2<K>           Polygon_2 ;
+    //typedef CGAL::Straight_skeleton_2<K> Ss ;
+    //typedef boost::shared_ptr<Ss> SsPtr ;
+    std::vector< altPoint > points;
+    for (I iter = Extrema.begin(); iter != Extrema.end(); iter++){
+        points.push_back(altPoint((float)get<0>(*iter), (float)get<1>(*iter)));
+    }
+    //SsPtr iss = CGAL::create_interior_straight_skeleton_2(points.begin(), points.end());
+    //std::cout << iss << std::endl;
+    
+
+}
+*/
+
+
+tuple<point, int> InCircle (vector<point> Extrema){
+    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+    typedef CGAL::Delaunay_triangulation_2<K>                   Delaunay;    
+    typedef K::Point_2                                          altPoint;
+    typedef K::Line_2                                           Line;
+    std::vector< altPoint > points;
+    Extrema = Extrema_8(Extrema.begin(),Extrema.end());
+    for (I iter = Extrema.begin(); iter != Extrema.end(); iter++){
+        points.push_back(altPoint((float)get<0>(*iter), (float)get<1>(*iter)));
+    }
+    Delaunay dt;
+    dt.insert(points.begin(), points.end());
+    std::cout << dt.number_of_faces() << std::endl;
+    Delaunay::Finite_faces_iterator it;
+    altPoint Max;
+    float maxRadius = -1;
+
+    for (it = dt.finite_faces_begin(); it != dt.finite_faces_end(); it++) {   
+        
+        altPoint circum = CGAL::circumcenter(dt.triangle(it)[0],dt.triangle(it)[1],dt.triangle(it)[2]);
+        float newRadius = CGAL::squared_distance(circum,dt.triangle(it)[2]); 
+        if( newRadius > maxRadius){ 
+            maxRadius = newRadius;
+            Max = circum;}
+    }
+    
+
+
+    Line line2(*prev(points.end()), *points.begin());
+    float dist = CGAL::squared_distance(Max,line2);
+    float minRadius = std::numeric_limits<float>::max();
+    if (dist < minRadius){
+            minRadius = dist;
+        }
+    for ( vector<altPoint>::iterator iter = points.begin(); iter != prev( points.end()); iter++){
+        Line line(*iter, *next(iter));
+        dist = CGAL::squared_distance(Max,line);
+        std::cout << " " << (*iter).x() << " " << (*iter).y() << " ";
+        std::cout << " " << (*next(iter)).x() << " " << (*next(iter)).y() << " ";
+        std::cout << " circumcenter: " << Max.x() << " " << Max.y() << "\n";
+        std::cout << " Radius: " << sqrt(dist) << "\n";
+        std::cout << std::endl << "-------------------" << std::endl;
+        
+        if (dist < minRadius){
+            minRadius = dist;
+        }
+    }
+    std::cout << " circumcenter: " << Max.x() << " " << Max.y() << "\n";
+    std::cout << " Radius: " << minRadius << "\n";
+      
+
+}
+
 // ############################################################################################
 // ################################ Throwaways ################################################
 // ############################################################################################
@@ -231,11 +305,31 @@ tuple<vector<point>, int, int> CirclePrune(std::vector<point> Points, point Cent
     return {PlaneSweep(RESULT), comps,removed};
 }
 
-
-
-
-
-
+tuple<vector<point>, int, int> ShoeLacePrune(std::vector<point> Points, std::vector<point> Approx ){
+    vector<point> RESULT;
+    bool dinmor;
+    int comps = 0;
+    int removed = 0;
+    for(I iter = Points.begin(); iter != Points.end(); iter++){
+        dinmor = true;
+        if (ccw(*prev((Approx.end())), *(Approx.begin()),(*iter))){
+            RESULT.push_back(*iter);
+            dinmor =false;            
+        }
+        comps++;
+        for( I Extreme = Approx.begin(); Extreme != prev(Approx.end()); Extreme++){        
+            if (dinmor) {
+                comps++;
+                if ( ccw(*Extreme, *next(Extreme),*iter)){
+                    RESULT.push_back(*iter);
+                    dinmor = false;
+                }
+            }
+        }
+        if (dinmor) {removed ++;}
+    }
+    return {PlaneSweep(RESULT), comps,removed};
+}
 
 // ############################################################################
 // ######################## SIMPLE THROW AWAY #################################
@@ -312,7 +406,7 @@ tuple<vector<point>, int, int> ShoelaceThrowAwayHull(std::vector<point> p){
 
 
 // ###########################################################################
-// ####################### SIMPLE POINT PLANE#################################
+// ####################### SIMPLE POINT PLANE ################################
 // ###########################################################################
 
 // Implement a struct, which contains the convex hull and number of comparisons.
@@ -355,7 +449,7 @@ struct PointPlane {
         };
         return 0;
     };
-    int GenerateCirclePoints2 (int Radius, int n){
+    /*int GenerateCirclePoints2 (int Radius, int n){
         unsigned seed = 0;
         std::default_random_engine gen (seed);
         std::uniform_real_distribution<> uniform_dist_Radius(-(float)Radius, (float)Radius);
@@ -370,7 +464,7 @@ struct PointPlane {
             this->AllPoints.push_back(p);
         };
         return 0;
-    };
+    };*/
 
 
 
@@ -446,17 +540,11 @@ int main() {
     SquareHull plane;
     BaseHull plane2;
     // plane.GenerateSquarePoints(100,100,100);
-    plane.GenerateCirclePoints(10000,1000);
+    plane.GenerateCirclePoints(1000,1000);
     plane.GetPoints();
     plane.ThrowAwayHull();
     plane.GetHull();
     plane.GetCompsAndRemoved();
-    plane2.GenerateCirclePoints(10000,1000);
-    plane2.GetPoints();
-    plane2.ThrowAwayHull();
-    plane2.GetHull();
-    plane2.GetCompsAndRemoved();
-
-    
+    InCircle(plane.AllPoints);
     return 0;
 }
