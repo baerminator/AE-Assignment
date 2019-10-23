@@ -211,7 +211,7 @@ tuple<point, int> InCircle (vector<point> Extrema){
     typedef K::Point_2                                          altPoint;
     typedef K::Line_2                                           Line;
     std::vector< altPoint > points;
-    Extrema = Extrema_8(Extrema.begin(),Extrema.end());
+    //Extrema = Extrema_8(Extrema.begin(),Extrema.end());
     for (I iter = Extrema.begin(); iter != Extrema.end(); iter++){
         points.push_back(altPoint((float)get<0>(*iter), (float)get<1>(*iter)));
     }
@@ -242,19 +242,13 @@ tuple<point, int> InCircle (vector<point> Extrema){
     for ( vector<altPoint>::iterator iter = points.begin(); iter != prev( points.end()); iter++){
         Line line(*iter, *next(iter));
         dist = CGAL::squared_distance(Max,line);
-        std::cout << " " << (*iter).x() << " " << (*iter).y() << " ";
-        std::cout << " " << (*next(iter)).x() << " " << (*next(iter)).y() << " ";
-        std::cout << " circumcenter: " << Max.x() << " " << Max.y() << "\n";
-        std::cout << " Radius: " << sqrt(dist) << "\n";
-        std::cout << std::endl << "-------------------" << std::endl;
-        
         if (dist < minRadius){
             minRadius = dist;
         }
     }
-    std::cout << " circumcenter: " << Max.x() << " " << Max.y() << "\n";
-    std::cout << " Radius: " << minRadius << "\n";
-      
+    
+    point p = make_pair ((int)Max.x(),(int)Max.y());
+    return {p,(int)(sqrt(minRadius))};      
 
 }
 
@@ -363,8 +357,10 @@ tuple<vector<point>, int, int> SquareThrowAway(std::vector<point> p){
 // #############################################################################
 
 tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p) {
-    vector<point> max_position = Extrema_4(p.begin(), p.end());
+    vector<point> max_position = Extrema_8(p.begin(), p.end());
+    tuple<point, int> Circle = InCircle(max_position);
     tuple<vector<point>, int, int> RESULT;
+    RESULT = CirclePrune(p,get<0>(Circle),get<1>(Circle));
     return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
     
 }
@@ -535,6 +531,21 @@ struct SquareHull : PointPlane {
         return 0;
     }
 };
+
+
+// ###############################################################
+// ########################## CircleThrowAway ThrowAWAY ####################
+// ###############################################################
+struct CircleHull : PointPlane {
+    int ThrowAwayHull(){
+        tuple<vector<point>,int,int> res = CircleThrowAway(this->AllPoints);
+        this->ConveXHull = get<0>(res);
+        this->NrComps = get<1>(res);
+        this->removed =get<2>(res);
+        return 0;
+    }
+};
+
 
 int main() {   
     SquareHull plane;
