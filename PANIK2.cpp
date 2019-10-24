@@ -8,6 +8,7 @@
 #include <vector> 
 #include <stdlib.h>
 #include <limits>
+#include <initializer_list>
 //#include<boost/shared_ptr.hpp>
 //#include<CGAL/Polygon_2.h>
 //#include<CGAL/create_straight_skeleton_2.h>
@@ -23,7 +24,7 @@
 
 #define _USE_MATH_DEFINES
 using namespace std;
-typedef std::tuple<int, int> point;
+typedef std::tuple<double, double> point;
 typedef vector<point>::iterator I;
 typedef vector<point> VP;
 
@@ -397,41 +398,33 @@ tuple<double, double, double, double> circleInTri(vector<point> p) {
     double b = sqrt(pow((double) xCoords[0]-xCoords[2], 2.0) + pow((double) yCoords[0]-yCoords[2], 2.0));
     double c = sqrt(pow((double) xCoords[0]-xCoords[1], 2.0) + pow((double) yCoords[0]-yCoords[1], 2.0));
     double s = (a+b+c)/2;
-    cout << "abc is:" << a << " " << b << " " << c << " ";
     double r = sqrt(s*(s-a)*(s-b)*(s-c))/s;
-    cout << "r is:\n" << r << "\n";
     double x_c = (a*xCoords[0]+b*xCoords[1]+c*xCoords[2])/(a+b+c);
     double y_c = (a*yCoords[0]+b*yCoords[1]+c*yCoords[2])/(a+b+c);
     double A = M_PI*pow(r, 2.0);
     tuple<double, double, double, double> RESULT = {x_c, y_c, r, A};
-    cout << get<0>(RESULT) << "\n";
-    cout << get<1>(RESULT) << "\n";
-    cout << get<2>(RESULT) << "\n";
-    cout << get<3>(RESULT) << "\n";
     return RESULT;
 }
 
 //Find largest incircle in rectangle
 tuple<double, double, double, double> isRectangle(std::vector<int> xCoords) {
+    cout << "Four points form rectangle";
     double x_c = (xCoords[3] - xCoords[0])/2;
     double y_c = (xCoords[1] - xCoords[0])/2;
     double r = x_c - xCoords[0];
     double a = M_PI*pow(r,2.0);
     tuple<double, double, double, double> RESULT = {x_c, y_c, r, a};
-    cout << "Rectangle with following incircle:\n";
-    cout << "Center in:" << get<0>(RESULT) << get<1>(RESULT) << "Radius: " << get<2>(RESULT) << "\n";
     return RESULT;
 }
 
 //Find largest incircle in Rhomba
 tuple<double, double, double, double> isRhombus(std::vector<int> xCoords, std::vector<int> yCoords) {
-    
-
+    cout << "Rhombus spotted\n";
 }
 
 //Find largest incircle in Parallelogram 
 tuple<double, double, double, double> isParallelogram(std::vector<int> xCoords, std::vector<int> yCoords) {
-
+    cout << "Parallelogram spotted\n";
 }
 
 //MISSING: Find incircle of parallelogram and Rhomba (Possible?)
@@ -446,6 +439,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
     I ui = std::unique(max_positionSort.begin(), max_positionSort.end());
     max_positionSort.resize(std::distance(max_positionSort.begin(), ui));
     if (max_positionSort.size() == 3) { //There are only three extreme points, find incircle in the triangle
+        cout << "Max_positionSort.size() == 3\n";
         return circleInTri(max_positionSort);
     }
     for (std::size_t i = 0; i < max_position.size(); i++) {
@@ -471,19 +465,20 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
     //Avoid dividing by zero or getting zero-slope by checking equality of coordinates
     double AB_Slope, BC_Slope, CD_Slope, DA_Slope;
     if (yCoords[0] != yCoords[1] && xCoords[0] != xCoords[1]) {
-        AB_Slope = abs((yCoords[0]-yCoords[1])/(xCoords[0]-xCoords[1]));
+        AB_Slope = (double)abs((double)(yCoords[0]-yCoords[1])/(double)(xCoords[0]-xCoords[1]));
     }
     if (yCoords[1] != yCoords[2] && xCoords[1] != xCoords[2]) {
-        BC_Slope = abs((yCoords[1]-yCoords[2])/(xCoords[1]-xCoords[2]));
+        BC_Slope = (double)abs(((double)yCoords[1]-yCoords[2])/(double)(xCoords[1]-xCoords[2]));
     }
     if (yCoords[2] != yCoords[3] && xCoords[2] != xCoords[3]) {
-        CD_Slope = abs((yCoords[3]-yCoords[2])/(xCoords[3]-xCoords[2]));
+        CD_Slope = (double)abs(((double)yCoords[3]-yCoords[2])/((double)xCoords[3]-xCoords[2]));
     }
     if (yCoords[3] != yCoords[0] && xCoords[3] != xCoords[0]) {
-        DA_Slope = abs((yCoords[3]-yCoords[0])/(xCoords[3]-xCoords[0]));
+        DA_Slope = (double)abs(((double)yCoords[3]-yCoords[0])/((double)xCoords[3]-xCoords[0]));
     }
     //Opposite sides AB and CD must collide if different slopes
     if (AB_Slope != CD_Slope && BC_Slope == DA_Slope) { //Find point of collision x_p through determinant
+        cout << "AB_Slope: " << AB_Slope << "CD_Slope: " << CD_Slope << "BC slope: " << BC_Slope << "DA_Slope: " << DA_Slope << "\n";
         double x_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(xCoords[2]-xCoords[3])
         -(xCoords[0]-xCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
         (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
@@ -491,7 +486,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         double y_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(yCoords[2]-yCoords[3])
         -(yCoords[0]-yCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
         (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
-        point P = std::make_tuple((int)x_p, (int)y_p);
+        point P = std::make_tuple(x_p, y_p);
         //Either triangle AB, AP, BP or triangle CD, CP, PD has largest are. Find this triangle with the largest area
         //Make two vectors, each consisting of points mentioned in above comment
         vector<point> p1, p2;
@@ -501,9 +496,10 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         } 
         p1.push_back(P);
         p2.push_back(P);
+        cout << "AB and CD intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(p1);
         tuple<double, double, double, double> Circle2 = circleInTri(p2);
-        if (get<3>(Circle1) > get<3>(Circle2)) { //Return circle with largest area
+        if (get<3>(Circle1) >= get<3>(Circle2)) { //Return circle with largest area
             return Circle1;
         }
         else {
@@ -519,7 +515,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         double y_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(yCoords[3]-yCoords[4])
         -(yCoords[1]-yCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
         (xCoords[1]-xCoords[2]*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
-        point P = std::make_tuple((int)x_p, (int)y_p);
+        point P = std::make_tuple(x_p, y_p);
         //Either triangle AB, AP, BP or triangle CD, CP, PD has largest are. Find this triangle with the largest area
         //Make two vectors, each consisting of points mentioned in above comment
         vector<point> p1, p2;
@@ -529,9 +525,10 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         } 
         p1.push_back(P);
         p2.push_back(P);
+        cout << "BC and DA intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(p1);
         tuple<double, double, double, double> Circle2 = circleInTri(p2);
-        if (get<3>(Circle1) > get<3>(Circle2)) {
+        if (get<3>(Circle1) >= get<3>(Circle2)) {
             return Circle1;
         }
         else {
@@ -540,7 +537,59 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
     }
     //All opposite sides are pair-wise none-parallel (Thus four triangles possible)
     if (AB_Slope != CD_Slope && BC_Slope != DA_Slope) {
+        double ABCD_x_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(xCoords[2]-xCoords[3])
+        -(xCoords[0]-xCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
+        (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
 
+        double ABCD_y_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(yCoords[2]-yCoords[3])
+        -(yCoords[0]-yCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
+        (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
+
+        point ABCD_P = std::make_tuple((int)ABCD_x_p, (int)ABCD_y_p);
+
+        double BCDA_x_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(xCoords[3]-xCoords[4])
+        -(xCoords[1]-xCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
+        (xCoords[1]-xCoords[2]*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
+
+        double BCDA_y_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(yCoords[3]-yCoords[4])
+        -(yCoords[1]-yCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
+        (xCoords[1]-xCoords[2]*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
+        point BCDA_P = std::make_tuple((int)BCDA_x_p, (int)BCDA_y_p);
+
+        vector<point> ABCD_p1, ABCD_p2, BCDA_p1, BCDA_p2;
+
+        for (std::size_t i = 0; i < 2; i++) {
+            ABCD_p1.push_back(std::make_tuple(xCoords[i], yCoords[i]));
+            ABCD_p2.push_back(std::make_tuple(xCoords[i+2], yCoords[i+2]));
+        } 
+        for (std::size_t i = 1; i < 3; i++) {
+            BCDA_p1.push_back(std::make_tuple(xCoords[i], yCoords[i]));
+            BCDA_p2.push_back(std::make_tuple(xCoords[3-3*(i-1)], yCoords[3-3*(i-1)])); //3-3*(i-1) = 3 when i = 1 and 0 when i=2
+        } 
+        cout << "All sides intersect\n";
+        tuple<double, double, double, double> Circle1 = circleInTri(ABCD_p1);
+        tuple<double, double, double, double> Circle2 = circleInTri(ABCD_p2);
+        tuple<double, double, double, double> Circle3 = circleInTri(BCDA_p1);
+        tuple<double, double, double, double> Circle4 = circleInTri(BCDA_p2);
+        double biggestArea = std::max({get<3>(Circle1), get<3>(Circle2), get<3>(Circle3), get<3>(Circle4)});
+        if (biggestArea == get<3>(Circle1)) {
+            cout << "Circle1\n";
+            return Circle1;
+        }
+        else if (biggestArea == get<3>(Circle2)) {
+            cout <<"Circle2\n";
+            return Circle2;
+        }
+        else if (biggestArea == get<3>(Circle3)) {
+            cout << "Circle3\n";
+            return Circle3;
+        }
+        else {
+            cout << "Circle4\n";
+            cout << "Final circle x: " << get<0>(Circle4) << "y Coordinate: " << get<1>(Circle4) << "Radius: " << get<2>(Circle4) << "Area: " << get<3>(Circle4) << "\n";
+            //cout << "The final circle is: " << "X coordinate: " << get<0>(Circle(4))
+            return Circle4;
+        }
     }
 }
 
@@ -609,7 +658,13 @@ tuple<vector<point>, int, int> LauneyThrowAway(std::vector<point> p) {
     return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
 }
 
-
+tuple<vector<point>, int, int> CircleThingThrowAway(std::vector<point> p) {
+    tuple<double, double, double, double> CircleVals = circleThing(p);
+    point p_c = std::make_tuple(get<0>(CircleVals), get<1>(CircleVals));
+    double r = get<2>(CircleVals);
+    tuple<vector<point>, int, int> RESULT = CirclePrune(p, p_c, r);
+    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT), get<2>(RESULT)};
+}
 
 // #############################################################################
 // ######################### Shoelace Throwaway ################################
@@ -791,7 +846,7 @@ struct SquareHull : PointPlane
 // ###############################################################
 struct CircleHull : PointPlane {
     int ThrowAwayHull(){
-        tuple<vector<point>,int,int> res = LauneyThrowAway(this->AllPoints);
+        tuple<vector<point>,int,int> res = CircleThingThrowAway(this->AllPoints);
         this->ConveXHull = get<0>(res);
         this->NrComps = get<1>(res);
         this->removed =get<2>(res);
@@ -801,15 +856,29 @@ struct CircleHull : PointPlane {
 
 
 int main() {   
-    CircleHull plane;
-    BaseHull plane2;
-    BaseHull plane3;
-    // plane.GenerateSquarePoints(100,100,100);
-    plane.GenerateCirclePoints(1000,1000);
-    plane.GetPoints();
-    plane.ThrowAwayHull();
-    plane.GetHull();
-    plane.GetCompsAndRemoved();
-    InCircle(plane.AllPoints);
+    //CircleHull plane;
+    //BaseHull plane2;
+    //BaseHull plane3;
+    //CircleHull plane4;
+    BaseHull plane5; 
+    //// plane.GenerateSquarePoints(100,100,100);
+    //plane.GenerateCirclePoints(1000,1000);
+    //plane.GetPoints();
+    //plane.ThrowAwayHull();
+    //plane.GetHull();
+    //plane.GetCompsAndRemoved();
+    //InCircle(plane.AllPoints);
+    //plane4.GenerateCirclePoints(1000,1000);
+    //plane4.GetPoints();
+    //plane4.ThrowAwayHull();
+    //plane4.GetHull();
+    //CircleThingThrowAway(plane4.AllPoints);
+    //plane4.GetCompsAndRemoved();
+    plane5.GenerateSquarePoints(100, 100, 1000);
+    plane5.GetPoints();
+    plane5.ThrowAwayHull();
+    plane5.GetHull();
+    CircleThingThrowAway(plane5.AllPoints);
+    plane5.GetCompsAndRemoved();
     return 0;
 }
