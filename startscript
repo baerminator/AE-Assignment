@@ -1,2 +1,3 @@
-rm points.csv && touch points.csv && rm Hull.csv && touch Hull.csv &&  g++ PANIK2.cpp -lCGAL -lgmp -frounding-math  && ./a.out && python test.py
+#!/bin/bash
+rm points.csv && touch points.csv && rm Hull.csv && touch Hull.csv &&  g++ ThrowAwayHull.cpp -lCGAL -lgmp -frounding-math  && ./a.out && rm a.out 
 

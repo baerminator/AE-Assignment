@@ -1,9 +1,0 @@
-\section{Introduction}
-
-In this paper, we have attenpted to theorize and implement different algorithms for calculating the convex hull of a set of points.\\
-More formally, for some $n$ points in the plane in a set $S$, we have attempted to calculate the minimal set of points $C \in S$, such that all points in $S$ either lie on the boundary or in the interrior of the convex polygon derived from all points in $C$.\\
-Our all-around goal has been to create \textit{efficient} algorithms for solving this problem, where we determine the amount of comparisons made between points as our meassurement for the \textit{efficiency} of our algorithm. That is, our goal has been to implement a Convex Hull algorithm, which uses the feest number
-of comparisons. We use number of comparisons as a measurement of efficieness, asour algorithms already run in the best posible asymptotic time of $O(nlog(n))$ and the constant factors are influenced by the number of point-comparisons. \\
-Afterwards, we compare our algorithms with each other to determine, which perform better under what scenarios and try to specify the use cases for each algorithm.
-This paper will describe the iterative process, including all our successes and failures, through which we have implemened our final algorithms.
-
