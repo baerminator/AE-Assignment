@@ -631,15 +631,21 @@ tuple<point, int> InCircle (vector<point> Extrema){
     typedef K::Point_2                                          altPoint;
     typedef K::Line_2                                           Line;
     std::vector< altPoint > points;
+
+    // Transform to points used by CGAL.
     for (I iter = Extrema.begin(); iter != Extrema.end(); iter++){
         points.push_back(altPoint((float)get<0>(*iter), (float)get<1>(*iter)));
     }
+
+    // Construct the Delauney Triangle
     Delaunay dt;
     dt.insert(points.begin(), points.end());
+    
+
+    // Find the circle with maximum circumcircle
     Delaunay::Finite_faces_iterator it;
     altPoint Max;
     float maxRadius = -1;
-
     for (it = dt.finite_faces_begin(); it != dt.finite_faces_end(); it++) {   
         
         altPoint circum = CGAL::circumcenter(dt.triangle(it)[0],dt.triangle(it)[1],dt.triangle(it)[2]);
@@ -650,7 +656,7 @@ tuple<point, int> InCircle (vector<point> Extrema){
     }
     
 
-
+    // Find the maximum radius of the center
     Line line2(*prev(points.end()), *points.begin());
     float dist = CGAL::squared_distance(Max,line2);
     float minRadius = std::numeric_limits<float>::max();
@@ -664,7 +670,8 @@ tuple<point, int> InCircle (vector<point> Extrema){
             minRadius = dist;
         }
     }
-    
+
+    // return the Circle as a tuple
     point p = make_pair ((int)Max.x(),(int)Max.y());
     return {p,(int)(sqrt(minRadius))};      
 
