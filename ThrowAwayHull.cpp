@@ -1120,13 +1120,9 @@ int main() {
         
         
     //OUT-COMMENT THE FOLLOWING TO TEST ALL IMPLEMENTATIONS ON ALL SHAPES AND FOR VALUES {1000, 10000, 100000, 100000, 1000000}:
-    /*    
+     
     int testArr[] = {1000, 10000, 100000, 1000000};
     for (int i = 0; i < 4; i++) {
-
-        LauneyHullRescaledCorners planeSquare;
-        LauneyHullRescaledCorners planeCircle;
-        LauneyHullRescaledCorners planeRand;
 
         LauneyHull planeSquare2;
         LauneyHull planeCircle2;
@@ -1156,7 +1152,10 @@ int main() {
         FinalHull planeCircle8;
         FinalHull planeRand8;
 
-        planeSquare.GenerateSquarePoints(1000, 1000, testArr[i]);
+        ReDeComHull planeSquare9;
+        ReDeComHull planeCircle9;
+        ReDeComHull planeRand9;
+
         planeSquare2.GenerateSquarePoints(1000, 1000, testArr[i]);
         planeSquare3.GenerateSquarePoints(1000, 1000, testArr[i]);
         planeSquare4.GenerateSquarePoints(1000, 1000, testArr[i]);
@@ -1164,8 +1163,8 @@ int main() {
         planeSquare6.GenerateSquarePoints(1000, 1000, testArr[i]);
         planeSquare7.GenerateSquarePoints(1000, 1000, testArr[i]);
         planeSquare8.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare9.GenerateSquarePoints(1000, 1000, testArr[i]);
 //
-        planeSquare.ThrowAwayHull();
         planeSquare2.ThrowAwayHull();
         planeSquare3.ThrowAwayHull();
         planeSquare4.ThrowAwayHull();
@@ -1173,10 +1172,14 @@ int main() {
         planeSquare6.ThrowAwayHull();
         planeSquare7.ThrowAwayHull();
         planeSquare8.ThrowAwayHull();
+        planeSquare9.ThrowAwayHull();
 
         cout << "\n";
         cout << "############## DATASET: SQUARE POINTS ##############" << "\n";
         cout << "Number of points: " << testArr[i] << "\n";
+        cout << "Final Hull" << testArr[i] << "\n";
+        planeSquare9.GetCompsAndRemoved();
+        cout << "Final Hull + prune" << testArr[i] << "\n";
         planeSquare8.GetCompsAndRemoved();
         cout << "LauneyHull" << "\n";
         planeSquare2.GetCompsAndRemoved();
@@ -1191,16 +1194,15 @@ int main() {
         cout << "LauneyHullRescaled" << "\n";
         planeSquare7.GetCompsAndRemoved();
 
-        planeCircle.GenerateCirclePoints(1000, testArr[i]);
         planeCircle2.GenerateCirclePoints(1000, testArr[i]);
         planeCircle3.GenerateCirclePoints(1000, testArr[i]);
         planeCircle4.GenerateCirclePoints(1000, testArr[i]);
         planeCircle5.GenerateCirclePoints(1000, testArr[i]);
         planeCircle6.GenerateCirclePoints(1000, testArr[i]);
         planeCircle7.GenerateCirclePoints(1000, testArr[i]);
-        planeCircle8.GenerateCirclePoints(1000, testArr[i]);    
+        planeCircle8.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle9.GenerateCirclePoints(1000, testArr[i]);
 
-        planeCircle.ThrowAwayHull();
         planeCircle2.ThrowAwayHull();
         planeCircle3.ThrowAwayHull();
         planeCircle4.ThrowAwayHull();
@@ -1208,11 +1210,14 @@ int main() {
         planeCircle6.ThrowAwayHull();
         planeCircle7.ThrowAwayHull();
         planeCircle8.ThrowAwayHull();
+        planeCircle9.ThrowAwayHull();
 
         cout << "\n";
         cout << "############## DATASET: CIRCULAR POINTS ##############" << "\n";
         cout << "Number of points: " << testArr[i] << "\n";
-        cout << "Delauney Combined" << "\n";
+        cout << "Final Hull" << "\n";
+        planeCircle9.GetCompsAndRemoved();
+        cout << "Final Hull + Prune" << "\n";
         planeCircle8.GetCompsAndRemoved();
         cout << "LauneyHull" << "\n";
         planeCircle2.GetCompsAndRemoved();
@@ -1227,7 +1232,6 @@ int main() {
         cout << "LauneyHullRescaled" << "\n";
         planeCircle7.GetCompsAndRemoved();
 
-        planeRand.GenerateRandomPoints(1000, 1000, testArr[i]);
         planeRand2.GenerateRandomPoints(1000, 1000, testArr[i]);
         planeRand3.GenerateRandomPoints(1000, 1000, testArr[i]);
         planeRand4.GenerateRandomPoints(1000, 1000, testArr[i]);
@@ -1235,9 +1239,8 @@ int main() {
         planeRand6.GenerateRandomPoints(1000, 1000, testArr[i]);
         planeRand7.GenerateRandomPoints(1000, 1000, testArr[i]);
         planeRand8.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand9.GenerateRandomPoints(1000, 1000, testArr[i]);
 
-
-        planeRand.ThrowAwayHull();
         planeRand2.ThrowAwayHull();
         planeRand3.ThrowAwayHull();
         planeRand4.ThrowAwayHull();
@@ -1245,11 +1248,14 @@ int main() {
         planeRand6.ThrowAwayHull();
         planeRand7.ThrowAwayHull();
         planeRand8.ThrowAwayHull();
+        planeRand9.ThrowAwayHull();
 
         cout << "\n";
         cout << "############## DATASET: RANDOM POINTS ##############" << "\n";
         cout << "Number of points: " << testArr[i] << "\n";
-        cout << "Delauney Combined" << "\n";
+        cout << "Final Hull" << "\n";
+        planeRand9.GetCompsAndRemoved();
+        cout << "Final Hull + Prune" << "\n";
         planeRand8.GetCompsAndRemoved();
         cout << "LauneyHull" << "\n";
         planeRand2.GetCompsAndRemoved();
@@ -1265,7 +1271,6 @@ int main() {
         planeRand7.GetCompsAndRemoved();
 
     }
-    */
 
     //OUT-COMMENT THE FOLLOWING ONE AT A TIME TO GET PICTURES OF HULLS:
 
