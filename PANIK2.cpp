@@ -35,7 +35,6 @@ bool ccw(const point &a, const point &b, const point &c)
     return ((std::get<0>(b) - std::get<0>(a)) * (std::get<1>(c) - std::get<1>(a))) > ((std::get<1>(b) - std::get<1>(a)) * (std::get<0>(c) - std::get<0>(a)));
 }
 
-//Performs X sort ( maybe implement lexicographical sorting)
 std::vector<point> PlaneSweep(std::vector<point> p){
     int comp = 0;
     if (p.size() == 0)
@@ -84,7 +83,7 @@ std::vector<point> PlaneSweep(std::vector<point> p){
 
 vector<point> Extrema_8(I first, I past){
     assert(first != past);
-    vector<point> max_position(8, (*first)); //Vector to keep extreme points
+    vector<point> max_position(8, (*first)); 
 
     //Define starting values for the eight extreme points
     int xmin = get<0>(*first);
@@ -154,7 +153,7 @@ vector<point> Extrema_8(I first, I past){
 vector<point> Extrema_4(I first, I past)
 {
     assert(first != past);
-    vector<point> max_position(4, (*first)); //Vector to keep extreme points
+    vector<point> max_position(4, (*first)); 
 
     //Define starting values for the eight extreme points
     int xmin = get<0>(*first);
@@ -190,14 +189,14 @@ vector<point> Extrema_4(I first, I past)
             max_position[1] = (*i);
         }
     }
-    // This part removes duplicates:get<0>(*iter)
+    // This part removes duplicates
     max_position.resize(std::distance(max_position.begin(), std::unique(max_position.begin(), max_position.end())));
     return max_position;
 }
 
 vector<point> Extrema_4_corner(I first, I past){
     assert(first != past);
-    vector<point> max_position(4, (*first)); //Vector to keep extreme points
+    vector<point> max_position(4, (*first)); 
 
     //Define starting values for the eight extreme points
     int xmin = get<0>(*first);
@@ -380,14 +379,12 @@ tuple<double, double, double, double> circleInTri(vector<point> p) {
     double x_c = (double)((a*xCoords[0]+b*xCoords[1]+c*xCoords[2])/(a+b+c));
     double y_c = (double)((a*yCoords[0]+b*yCoords[1]+c*yCoords[2])/(a+b+c));
     double A = (double)(M_PI*pow(r, 2.0));
-    //cout << "a is: " << a << "b is: " << b << "c is: " << c << "r is: " << r << "Area is: " << A << "\n";
     tuple<double, double, double, double> RESULT = {x_c, y_c, r, A};
     return RESULT;
 }
 
 //Find largest incircle in rectangle
 tuple<double, double, double, double> isRectangle(std::vector<int> xCoords) {
-    //cout << "Four points form rectangle";
     double x_c = (xCoords[3] - xCoords[0])/2;
     double y_c = (xCoords[1] - xCoords[0])/2;
     double r = x_c - xCoords[0];
@@ -398,12 +395,10 @@ tuple<double, double, double, double> isRectangle(std::vector<int> xCoords) {
 
 //Find largest incircle in Rhomba
 tuple<double, double, double, double> isRhombus(std::vector<int> xCoords, std::vector<int> yCoords) {
-    //cout << "Rhombus spotted\n";
 }
 
 //Find largest incircle in Parallelogram 
 tuple<double, double, double, double> isParallelogram(std::vector<int> xCoords, std::vector<int> yCoords) {
-    //cout << "Parallelogram spotted\n";
 }
 
 
@@ -416,14 +411,11 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
     I ui = std::unique(max_positionSort.begin(), max_positionSort.end());
     max_positionSort.resize(std::distance(max_positionSort.begin(), ui));
     if (max_positionSort.size() == 3) { //There are only three extreme points, find incircle in the triangle
-        //cout << "Max_positionSort.size() == 3\n";
         return circleInTri(max_positionSort);
     }
     for (std::size_t i = 0; i < max_position.size(); i++) {
         xCoords.push_back(get<0>(max_position[i]));
-        //cout << "x" << i << "is: " << xCoords[i] << "\n";
         yCoords.push_back(get<1>(max_position[i]));
-        //cout << "y" << i << "is: " << yCoords[i];
     }
     if (xCoords[0] == xCoords[1] && xCoords[2] == xCoords[3]) { //Four points form a rectangle
         return isRectangle(xCoords);
@@ -457,7 +449,6 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
     }
     //Opposite sides AB and CD must collide if different slopes
     if (AB_Slope != CD_Slope && BC_Slope == DA_Slope) { //Find point of collision x_p through determinant
-        //cout << "AB_Slope: " << AB_Slope << "CD_Slope: " << CD_Slope << "BC slope: " << BC_Slope << "DA_Slope: " << DA_Slope << "\n";
         double x_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(xCoords[2]-xCoords[3])
         -(xCoords[0]-xCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
         (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
@@ -475,10 +466,9 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         } 
         AB_p1.push_back(P);
         AB_p2.push_back(P);
-        //cout << "AB and CD intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(AB_p1);
         tuple<double, double, double, double> Circle2 = circleInTri(AB_p2);
-        if (get<3>(Circle1) >= get<3>(Circle2)) { //Return circle with largest area
+        if (get<3>(Circle1) >= get<3>(Circle2)) { 
             return Circle1;
         }
         else {
@@ -495,8 +485,6 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         -(yCoords[1]-yCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
         (xCoords[1]-xCoords[2]*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
         point P = std::make_tuple(x_p, y_p);
-        //Either triangle AB, AP, BP or triangle CD, CP, PD has largest are. Find this triangle with the largest area
-        //Make two vectors, each consisting of points mentioned in above comment
         vector<point> BC_p1, BC_p2;
         for (std::size_t i = 1; i < 3; i++) {
             BC_p1.push_back(std::make_tuple(xCoords[3-3*(i-1)], yCoords[3-3*(i-1)])); //Tiangle formed by DP, AP
@@ -504,7 +492,6 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         } 
         BC_p1.push_back(P);
         BC_p2.push_back(P);
-        //cout << "BC and DA intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(BC_p1);
         tuple<double, double, double, double> Circle2 = circleInTri(BC_p2);
         if (get<3>(Circle1) >= get<3>(Circle2)) {
@@ -515,7 +502,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         }
     }
     //All opposite sides are pair-wise none-parallel (Thus four triangles possible)
-    if (AB_Slope != CD_Slope && BC_Slope != DA_Slope) { //X1 = 0 X2 = 1 X3 = 2 X4 = 3
+    if (AB_Slope != CD_Slope && BC_Slope != DA_Slope) { 
         double ABCD_x_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(xCoords[2]-xCoords[3])
         -(xCoords[0]-xCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
         ((xCoords[0]-xCoords[1])*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
@@ -526,8 +513,6 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
 
         point ABCD_P = std::make_tuple(ABCD_x_p, ABCD_y_p);
 
-        //cout << "Intersection Point ABCD_p: " << ABCD_x_p << " " << ABCD_y_p << "\n";
-        //X1 = 1 X2 = 2 X3 = 3 X4 = 0
         double BCDA_x_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(xCoords[3]-xCoords[0])
         -(xCoords[1]-xCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
         ((xCoords[1]-xCoords[2])*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
@@ -535,48 +520,36 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         double BCDA_y_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(yCoords[3]-yCoords[0])
         -(yCoords[1]-yCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
         ((xCoords[1]-xCoords[2])*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
-        //cout << "Intersection Point: " << ABCD_x_p << " " << ABCD_y_p << "\n";
         point BCDA_P = std::make_tuple(BCDA_x_p, BCDA_y_p);
-        //cout << "Intersection Point BCDA_P " << BCDA_x_p << " " << BCDA_y_p << "\n";
         vector<point> ABCD_p1, ABCD_p2, BCDA_p1, BCDA_p2;
 
         for (std::size_t i = 0; i < 2; i++) {
-            ABCD_p1.push_back(std::make_tuple(xCoords[i+2], yCoords[i+2])); //Triangle formed by CP, DP
-            ABCD_p2.push_back(std::make_tuple(xCoords[i], yCoords[i])); //Triangle formed by AP, BP
+            ABCD_p1.push_back(std::make_tuple(xCoords[i+2], yCoords[i+2])); 
+            ABCD_p2.push_back(std::make_tuple(xCoords[i], yCoords[i])); 
         } 
         for (std::size_t i = 1; i < 3; i++) {
-            BCDA_p1.push_back(std::make_tuple(xCoords[3-3*(i-1)], yCoords[3-3*(i-1)])); //Triangle formed by DP, AP
-            BCDA_p2.push_back(std::make_tuple(xCoords[i], yCoords[i])); //Triangle formed by BP, CP
+            BCDA_p1.push_back(std::make_tuple(xCoords[3-3*(i-1)], yCoords[3-3*(i-1)])); 
+            BCDA_p2.push_back(std::make_tuple(xCoords[i], yCoords[i])); 
         } 
-        ABCD_p1.push_back(BCDA_P); //Insert intersection-point between lines AB;CD
-        ABCD_p2.push_back(BCDA_P); //
+        ABCD_p1.push_back(BCDA_P); 
+        ABCD_p2.push_back(BCDA_P); 
         BCDA_p1.push_back(ABCD_P);
         BCDA_p2.push_back(ABCD_P);
-        //cout << "All sides intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(ABCD_p1);
         tuple<double, double, double, double> Circle2 = circleInTri(ABCD_p2);
         tuple<double, double, double, double> Circle3 = circleInTri(BCDA_p1);
         tuple<double, double, double, double> Circle4 = circleInTri(BCDA_p2);
         double biggestArea = std::max({get<3>(Circle1), get<3>(Circle2), get<3>(Circle3), get<3>(Circle4)});
         if (biggestArea == get<3>(Circle1)) {
-            //cout << "Circle1\n";
-            //cout << "Final circle x: " << get<0>(Circle1) << "y Coordinate: " << get<1>(Circle1) << "Radius: " << get<2>(Circle1) << "Area: " << get<3>(Circle1) << "\n";
             return Circle1;
         }
         else if (biggestArea == get<3>(Circle2)) {
-            //cout <<"Circle2\n";
-            //cout << "Final circle x: " << get<0>(Circle2) << "y Coordinate: " << get<1>(Circle2) << "Radius: " << get<2>(Circle2) << "Area: " << get<3>(Circle2) << "\n";
             return Circle2;
         }
         else if (biggestArea == get<3>(Circle3)) {
-            //cout << "Circle3\n";
-            //cout << "Final circle x: " << get<0>(Circle3) << "y Coordinate: " << get<1>(Circle3) << "Radius: " << get<2>(Circle3) << "Area: " << get<3>(Circle3) << "\n";
             return Circle3;
         }
         else {
-            //cout << "Circle4\n";
-            //cout << "Final circle x: " << get<0>(Circle4) << "y Coordinate: " << get<1>(Circle4) << "Radius: " << get<2>(Circle4) << "Area: " << get<3>(Circle4) << "\n";
-            //cout << "The final circle is: " << "X coordinate: " << get<0>(Circle(4))
             return Circle4;
         }
     }
@@ -630,20 +603,28 @@ tuple<double, double, double> ApproxCircle(std::vector<point> p)
     return RESULT;
 }
 
-tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p)
-{
-    vector<point> max_position = Extrema_4(p.begin(), p.end());
-    tuple<vector<point>, int, int> RESULT;
-    //RESULT = CirclePrune(p,get<0>(Circle),get<1>(Circle));
-    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
-    
+
+tuple<vector<point>, int, int> CircleThingThrowAway(std::vector<point> p) {
+    tuple<double, double, double, double> CircleVals = circleThing(p);
+    point p_c = std::make_tuple(get<0>(CircleVals), get<1>(CircleVals));
+    double r = get<2>(CircleVals);
+    tuple<vector<point>, int, int> RESULT = CirclePrune(p, p_c, r);
+    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT), get<2>(RESULT)};
 }
+
 
 
 
 // #############################################################################
 // ######################### Launey Throwaway ##################################
 // #############################################################################
+
+// #############################################################################
+// ######################## Launey Throwaway First Iteration ###################
+// #############################################################################
+
+
+
 tuple<point, int> InCircle (vector<point> Extrema){
     typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
     typedef CGAL::Delaunay_triangulation_2<K>                   Delaunay;    
@@ -700,13 +681,9 @@ tuple<vector<point>, int, int> LauneyThrowAway(std::vector<point> p) {
     return {get<0>(RESULT), get<1>(RESULT),get<2>(RESULT)};
 }
 
-tuple<vector<point>, int, int> CircleThingThrowAway(std::vector<point> p) {
-    tuple<double, double, double, double> CircleVals = circleThing(p);
-    point p_c = std::make_tuple(get<0>(CircleVals), get<1>(CircleVals));
-    double r = get<2>(CircleVals);
-    tuple<vector<point>, int, int> RESULT = CirclePrune(p, p_c, r);
-    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT), get<2>(RESULT)};
-}
+// #############################################################################
+// ######################## Launey Throwaway Second Iteration ##################
+// #############################################################################
 
 
 tuple<vector<point>, int, int> LauneyThrowAway4(std::vector<point> p) {
@@ -717,6 +694,12 @@ tuple<vector<point>, int, int> LauneyThrowAway4(std::vector<point> p) {
     //return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
     return {get<0>(RESULT), get<1>(RESULT),get<2>(RESULT)};
 }
+
+
+// #############################################################################
+// ######################## Launey Throwaway Third Iteration ###################
+// #############################################################################
+
 
 tuple<vector<point>, int, int> LauneyThrowAwayRescaled(std::vector<point> p) {
     vector<point> max_position = Extrema_8(p.begin(), p.end());
@@ -748,83 +731,19 @@ tuple<vector<point>, int, int> LauneyThrowAwayRescaled(std::vector<point> p) {
     return {get<0>(RESULT), get<1>(RESULT),get<2>(RESULT)};
 }
 
-tuple<vector<point>, int, int> LauneyThrowAwayRescaledCorners(std::vector<point> p) {
-    vector<point> max_position = Extrema_8(p.begin(), p.end());
-    double xmin = get<0>(max_position[0]);
-    double xmax = get<0>(max_position[4]);
-    double ymin = get<1>(max_position[6]);
-    double ymax = get<1>(max_position[2]);
-    double yRange = (ymax - ymin);
-    double xRange = (xmax - xmin);
-    
-
-    
-
-
-// Dette virker ikke når der er fjernet et element....
-    // remove unusable corners: 
-        for (I iter = max_position.begin(); iter != max_position.end(); iter ++){
-        //cout << " " << get<0>(*iter) << " " << get<1>(*iter) << "\n";
-    }    
-    //cout << "\n";
-    // xmin
-    if( get<0>(max_position[0]) == get<0>(max_position[1]) == get<0>(max_position[7]) ){
-        max_position[0] = max_position[1];
-    }
-   // xmax
-    if( get<0>(max_position[4]) == get<0>(max_position[5]) == get<0>(max_position[3]) ){
-        max_position[4] = max_position[5];
-    }
-    // ymin
-    if( get<1>(max_position[6]) == get<1>(max_position[7]) == get<1>(max_position[5]) ){
-        max_position[6] = max_position[7];
-    }
-    // ymax
-    if( get<1>(max_position[2]) == get<1>(max_position[3]) == get<1>(max_position[1]) ){
-        max_position[2] = max_position[3];
-    }
-    // removing same objects
-    max_position.resize(std::distance(max_position.begin(), std::unique(max_position.begin(), max_position.end())));
-    for (I iter = max_position.begin(); iter != max_position.end(); iter ++){
-        //cout << " " << get<0>(*iter) << " " << get<1>(*iter) << "\n";
-    }
-
-// OVENSTÅENDE VIRKER IKKE !!!
-
-    // Rescaling: 
-    for (I iter = p.begin(); iter != p.end(); iter++){
-        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
-        get<0>(*iter) = newX;
-    }
-    for (I iter = max_position.begin(); iter != max_position.end(); iter++){
-        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
-        get<0>(*iter) = newX;
-    }
-
-    tuple<point, int> Circle = InCircle(max_position);
-    tuple<vector<point>, int, int> RESULT;
-    RESULT = CirclePrune(p,get<0>(Circle),get<1>(Circle));
-    vector<point> ScaledHull = get<0>(RESULT);
-    // Backscaling
-    
-    
-    for ( I Iter = ScaledHull.begin(); Iter != ScaledHull.end(); Iter++){
-        int newX = (get<0>(*Iter) - ymin) * xRange / yRange + xmin;
-        get<0>(*Iter) = newX;
-    } 
-    //return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
-    return {get<0>(RESULT), get<1>(RESULT),get<2>(RESULT)};
-}
-
 
 
 //##############################################################################
-//############# BEST THROWAWAY #################################################
+//################### Launey Throwaway Fourth Iteration ########################
 //##############################################################################
 
 
 tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
     vector<point> max_position = Extrema_8(p.begin(), p.end());
+    // the solution below is a temporary solution because we did not 
+    // have time to implement a Extrema function that both returns the
+    // four extrema and the 8 extrema. 
+    // This can be easily fixed in the next iteration.
     vector<point> max_position2 = Extrema_4_corner(p.begin(), p.end());
     
     double xmin = get<0>(max_position[0]);
@@ -835,7 +754,7 @@ tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
     double yRange = (ymax - ymin);
     double xRange = (xmax - xmin);
 
-    // Rescaling: 
+    // Scaling the x axis by the y axis 
     for (I iter = p.begin(); iter != p.end(); iter++){
         int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
         get<0>(*iter) = newX;
@@ -852,9 +771,9 @@ tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
 
     tuple<point, int> Circle = InCircle(max_position);
     tuple<point, int> Circle2 = InCircle(max_position2);
-
     tuple<vector<point>, int, int> RESULT;
     
+    // Comparing the two different circles 
     vector<point> max_best_position;
     if (get<1>(Circle) > get<1>(Circle2)){
         RESULT = CirclePrune(p,get<0>(Circle),get<1>(Circle));
@@ -864,15 +783,11 @@ tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
         max_best_position = max_position2;
     }
     
-    
-    
+    // getting intermediary results
     int comp = get<1>(RESULT);
     int removed = get<2>(RESULT);
-
     
-
-
-    // Backscaling
+    // returning the x axis to the right values.
     vector<point> ScaledHull = get<0>(RESULT);
     
     for ( I Iter = ScaledHull.begin(); Iter != ScaledHull.end(); Iter++){
@@ -884,51 +799,14 @@ tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
         int newX = (get<0>(*Iter) - ymin) * xRange / yRange + xmin;
         get<0>(*Iter) = newX;
     }
-
+    // Use the basic prune on the remaining points.
     RESULT = Prune(ScaledHull,max_best_position);
 
     
 
 
-    //return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
-    return {get<0>(RESULT), get<1>(RESULT) + comp ,get<2>(RESULT) + removed};
-}
+    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
 
-
-
-
-
-//
-// #############################################################################
-// ######################### Shoelace Throwaway ################################
-// #############################################################################
-point calcCenter(I first, I last)
-{
-    float x = 0;
-    float y = 0;
-    float n = 0;
-    for (I iter = first; iter != last; iter++)
-    {
-        x += get<0>(*iter);
-        y += get<1>(*iter);
-        n++;
-    }
-    x = x / n;
-    y = y / n;
-    return make_pair((int)x, (int)y);
-}
-tuple<vector<point>, int, int> ShoelaceThrowAwayHull(std::vector<point> p)
-{
-    vector<point> max_position;
-    vector<point> RESULT;
-    max_position = Extrema_8(p.begin(), p.end());
-    bool dinmor;
-    int comps = 0;
-    int removed = 0;
-    int Shoelace = 0;
-    point center = calcCenter(max_position.begin(),max_position.end());
-    return {PlaneSweep(RESULT), comps,removed};
-    
 }
 
 //#############################################################################
@@ -982,10 +860,7 @@ struct PointPlane
     };
 
     int GenerateRandomPoints (int RangeX, int RangeY, int n) {
-        //unsigned seed = 0;
         int x, y;
-       // std::default_random_engine gen (seed);
-        //std::uniform_int_distribution<> RanInt(RangeX, RangeY);
         for(int i = 0; i < n; i++) {
             x = (std::rand() % (RangeX-1));
             y = (std::rand() % (RangeY-1));
@@ -1052,9 +927,9 @@ struct BaseHull : PointPlane
     }
 };
 
-// ###############################################################
-// ########################## SQUARE ThrowAWAY ####################
-// ###############################################################
+// #########################################################################
+// ######################### SQUARE ThrowAWAY ##############################
+// #########################################################################
 struct SquareHull : PointPlane
 {
     int ThrowAwayHull()
@@ -1067,9 +942,9 @@ struct SquareHull : PointPlane
     }
 };
 
-// ##############################################################
-// ##################### CIRCLE THROWAWAY #######################
-// ##############################################################
+// ##########################################################################
+// ##################### CIRCLE THROWAWAY ###################################
+// ##########################################################################
 
 struct CircleHull : PointPlane
 {
@@ -1083,9 +958,9 @@ struct CircleHull : PointPlane
     }
 };
 
-// ###############################################################
-// ########################## Launey ThrowAWAY ###################
-// ###############################################################
+// ##########################################################################
+// ########################## Launey ThrowAWAY ##############################
+// ##########################################################################
 struct LauneyHull : PointPlane {
     int ThrowAwayHull(){
         tuple<vector<point>,int,int> res = LauneyThrowAway(this->AllPoints);
@@ -1097,9 +972,9 @@ struct LauneyHull : PointPlane {
 };
 
 
-// ###############################################################
-// ########################## Launey ThrowAWAY (4) ###################
-// ###############################################################
+// ###########################################################################
+// ###################### Launey ThrowAWAY (4) ###############################
+// ###########################################################################
 struct LauneyHull4 : PointPlane {
     int ThrowAwayHull(){
         tuple<vector<point>,int,int> res = LauneyThrowAway4(this->AllPoints);
@@ -1110,9 +985,9 @@ struct LauneyHull4 : PointPlane {
     }
 };
 
-// ###############################################################
-// ########################## Launey ThrowAWAY Rescaled ###################
-// ###############################################################
+// ##########################################################################
+// ################# Launey ThrowAWAY Rescaled ##############################
+// ##########################################################################
 struct LauneyHullRescaled : PointPlane {
     int ThrowAwayHull(){
         tuple<vector<point>,int,int> res = LauneyThrowAwayRescaled(this->AllPoints);
@@ -1123,23 +998,10 @@ struct LauneyHullRescaled : PointPlane {
     }
 };
 
-// ###############################################################
-// ########################## Launey ThrowAWAY Rescaled Corners###
-// ###############################################################
-struct LauneyHullRescaledCorners : PointPlane {
-    int ThrowAwayHull(){
-        tuple<vector<point>,int,int> res = LauneyThrowAwayRescaledCorners(this->AllPoints);
-        this->ConveXHull = get<0>(res);
-        this->NrComps = get<1>(res);
-        this->removed =get<2>(res);
-        return 0;
-    }
-};
 
-
-// ###############################################################
-// ########################## Launey ThrowAway + BASE ############
-// ###############################################################
+// #########################################################################
+// ###################### Launey ThrowAway Combined ########################
+// #########################################################################
 
 struct BestHull : PointPlane {
     int ThrowAwayHull(){
