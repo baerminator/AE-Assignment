@@ -841,7 +841,7 @@ struct LauneyHullRescaled : PointPlane {
 };
 
 // ###############################################################
-// ########################## Launey ThrowAWAY Rescaled ###################
+// ########################## Launey ThrowAWAY Rescaled Corners###
 // ###############################################################
 struct LauneyHullRescaledCorners : PointPlane {
     int ThrowAwayHull(){
