@@ -403,8 +403,8 @@ tuple<double, double, double, double> circleInTri(vector<point> p) {
     double c = (double)(sqrt(pow((double) xCoords[2]-xCoords[0], 2.0) + pow((double) yCoords[2]-yCoords[0], 2.0)));
     double s = (double)((a+b+c)/2.0);
     double r = (double)(sqrt(s*(s-a)*(s-b)*(s-c))/s);
-    double x_c = (double)((a*xCoords[0]+b*xCoords[1]+c*xCoords[2])/(a+b+c));
-    double y_c = (double)((a*yCoords[0]+b*yCoords[1]+c*yCoords[2])/(a+b+c));
+    double x_c = (double)((a*xCoords[2]+b*xCoords[0]+c*xCoords[1])/(a+b+c));
+    double y_c = (double)((a*yCoords[2]+b*yCoords[0]+c*yCoords[1])/(a+b+c));
     double A = (double)(M_PI*pow(r, 2.0));
     cout << "a is: " << a << "b is: " << b << "c is: " << c << "r is: " << r << "Area is: " << A << "\n";
     tuple<double, double, double, double> RESULT = {x_c, y_c, r, A};
@@ -676,6 +676,14 @@ tuple<vector<point>, int, int> LauneyThrowAway(std::vector<point> p) {
 }
 
 tuple<vector<point>, int, int> CircleThingThrowAway(std::vector<point> p) {
+    tuple<double, double, double, double> CircleVals = circleThing(p);
+    point p_c = std::make_tuple(get<0>(CircleVals), get<1>(CircleVals));
+    double r = get<2>(CircleVals);
+    tuple<vector<point>, int, int> RESULT = CirclePrune(p, p_c, r);
+    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT), get<2>(RESULT)};
+}
+
+tuple<vector<point>, int, int> CircleThingThrowAwayNoPlaneSweep(std::vector<point> p) {
     tuple<double, double, double, double> CircleVals = circleThing(p);
     point p_c = std::make_tuple(get<0>(CircleVals), get<1>(CircleVals));
     double r = get<2>(CircleVals);

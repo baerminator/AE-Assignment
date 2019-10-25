@@ -1,0 +1,4 @@
+\documentclass{DIKU-report}
+\begin{document}
+\include{introduction}
+\end{document}
