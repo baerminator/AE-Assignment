@@ -818,6 +818,84 @@ tuple<vector<point>, int, int> LauneyThrowAwayRescaledCorners(std::vector<point>
 
 
 
+//##############################################################################
+//############# BEST THROWAWAY #################################################
+//##############################################################################
+
+
+tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
+    vector<point> max_position = Extrema_8(p.begin(), p.end());
+    vector<point> max_position2 = Extrema_4_corner(p.begin(), p.end());
+    
+    double xmin = get<0>(max_position[0]);
+    double xmax = get<0>(max_position[4]);
+    double ymin = get<1>(max_position[6]);
+    double ymax = get<1>(max_position[2]);
+
+    double yRange = (ymax - ymin);
+    double xRange = (xmax - xmin);
+
+    // Rescaling: 
+    for (I iter = p.begin(); iter != p.end(); iter++){
+        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
+        get<0>(*iter) = newX;
+    }
+    for (I iter = max_position.begin(); iter != max_position.end(); iter++){
+        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
+        get<0>(*iter) = newX;
+    }
+
+    for (I iter = max_position2.begin(); iter != max_position2.end(); iter++){
+        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
+        get<0>(*iter) = newX;
+    }
+
+    tuple<point, int> Circle = InCircle(max_position);
+    tuple<point, int> Circle2 = InCircle(max_position2);
+
+    tuple<vector<point>, int, int> RESULT;
+    
+    vector<point> max_best_position;
+    if (get<1>(Circle) > get<1>(Circle2)){
+        RESULT = CirclePrune(p,get<0>(Circle),get<1>(Circle));
+        max_best_position = max_position;
+    } else {
+        RESULT = CirclePrune(p,get<0>(Circle2),get<1>(Circle2));
+        max_best_position = max_position2;
+    }
+    
+    
+    
+    int comp = get<1>(RESULT);
+    int removed = get<2>(RESULT);
+
+    
+
+
+    // Backscaling
+    vector<point> ScaledHull = get<0>(RESULT);
+    
+    for ( I Iter = ScaledHull.begin(); Iter != ScaledHull.end(); Iter++){
+        int newX = (get<0>(*Iter) - ymin) * xRange / yRange + xmin;
+        get<0>(*Iter) = newX;
+    }
+
+    for ( I Iter = max_best_position.begin(); Iter != max_best_position.end(); Iter++){
+        int newX = (get<0>(*Iter) - ymin) * xRange / yRange + xmin;
+        get<0>(*Iter) = newX;
+    }
+
+    RESULT = Prune(ScaledHull,max_best_position);
+
+    
+
+
+    //return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
+    return {get<0>(RESULT), get<1>(RESULT) + comp ,get<2>(RESULT) + removed};
+}
+
+
+
 
 
 //
@@ -1058,142 +1136,49 @@ struct LauneyHullRescaledCorners : PointPlane {
     }
 };
 
+
+// ###############################################################
+// ########################## Launey ThrowAway + BASE ############
+// ###############################################################
+
+struct BestHull : PointPlane {
+    int ThrowAwayHull(){
+        tuple<vector<point>,int,int> res = BestThrowaway(this->AllPoints);
+        this->ConveXHull = get<0>(res);
+        this->NrComps = get<1>(res);
+        this->removed =get<2>(res);
+        return 0;
+    }
+};
+
+
+
+
 int main() {   
 
-    int testArr[] = {10, 100, 1000, 10000, 100000, 1000000};
+    int testArr[] = { 100000, 1000000};
 
     for (int i = 0; i < 6; i++) {
         cout << "\n";
+
+        BestHull planeSquare8;
+        BestHull planeCircle8;
+        BestHull planeRand8;
         
-        LauneyHullRescaledCorners planeSquare;
-        LauneyHullRescaledCorners planeCircle;
-        LauneyHullRescaledCorners planeRand;
-
-        LauneyHull planeSquare2;
-        LauneyHull planeCircle2;
-        LauneyHull planeRand2;
-
-        BaseHull planeSquare3;
-        BaseHull planeCircle3;
-        BaseHull planeRand3;
-
-        SquareHull planeSquare4;
-        SquareHull planeCircle4;
-        SquareHull planeRand4;
-
-        CircleHull planeSquare5;
-        CircleHull planeCircle5;
-        CircleHull planeRand5;
-
-        LauneyHull4 planeSquare6;
-        LauneyHull4 planeCircle6;
-        LauneyHull4 planeRand6;
-
-        LauneyHullRescaled planeSquare7;
-        LauneyHullRescaled planeCircle7;
-        LauneyHullRescaled planeRand7;
-        
-        planeSquare.GenerateSquarePoints(100, 100, testArr[i]);
-        planeSquare2.GenerateSquarePoints(100, 100, testArr[i]);
-        planeSquare3.GenerateSquarePoints(100, 100, testArr[i]);
-        planeSquare4.GenerateSquarePoints(100, 100, testArr[i]);
-        planeSquare5.GenerateSquarePoints(100, 100, testArr[i]);
-        planeSquare6.GenerateSquarePoints(100, 100, testArr[i]);
-        planeSquare7.GenerateSquarePoints(100, 100, testArr[i]);
-        
-        planeSquare.ThrowAwayHull();
-        planeSquare2.ThrowAwayHull();
-        planeSquare3.ThrowAwayHull();
-        planeSquare4.ThrowAwayHull();
-        planeSquare5.ThrowAwayHull();
-        planeSquare6.ThrowAwayHull();
-        planeSquare7.ThrowAwayHull();
-
-        cout << "\n";
-        cout << "############## DATASET: SQUARE POINTS ##############" << "\n";
         cout << "Number of points: " << testArr[i] << "\n";
-        cout << "LauneyHullRescaledCorners" << "\n";
-        planeSquare.GetCompsAndRemoved();
-        cout << "LauneyHull" << "\n";
-        planeSquare2.GetCompsAndRemoved();
-        cout << "BaseHull" << "\n";
-        planeSquare3.GetCompsAndRemoved();
-        cout << "SquareHull" << "\n",
-        planeSquare4.GetCompsAndRemoved();
-        cout << "CircleHull" << "\n";
-        planeSquare5.GetCompsAndRemoved();
-        cout << "LauneyHull4" << "\n";
-        planeSquare6.GetCompsAndRemoved();
-        cout << "LauneyHullRescaled" << "\n";
-        planeSquare7.GetCompsAndRemoved();
+        cout << "\nsquare";
+        planeSquare8.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare8.ThrowAwayHull();
+        planeSquare8.GetCompsAndRemoved();
+        cout << "\nCircle";
+        planeCircle8.GenerateCirclePoints(1000, testArr[i]);    
+        planeCircle8.ThrowAwayHull();
+        planeCircle8.GetCompsAndRemoved();
+        cout << "\nRandom";
+        planeRand8.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand8.ThrowAwayHull();
+        planeRand8.GetCompsAndRemoved();
 
-        planeCircle.GenerateCirclePoints(100, testArr[i]);
-        planeCircle2.GenerateCirclePoints(100, testArr[i]);
-        planeCircle3.GenerateCirclePoints(100, testArr[i]);
-        planeCircle4.GenerateCirclePoints(100, testArr[i]);
-        planeCircle5.GenerateCirclePoints(100, testArr[i]);
-        planeCircle6.GenerateCirclePoints(100, testArr[i]);
-        planeCircle7.GenerateCirclePoints(100, testArr[i]);
-        
-        planeCircle.ThrowAwayHull();
-        planeCircle2.ThrowAwayHull();
-        planeCircle3.ThrowAwayHull();
-        planeCircle4.ThrowAwayHull();
-        planeCircle5.ThrowAwayHull();
-        planeCircle6.ThrowAwayHull();
-        planeCircle7.ThrowAwayHull();
-
-        cout << "\n";
-        cout << "############## DATASET: CIRCULAR POINTS ##############" << "\n";
-        cout << "Number of points: " << testArr[i] << "\n";
-        cout << "LauneyHullRescaledCorners" << "\n";
-        planeCircle.GetCompsAndRemoved();
-        cout << "LauneyHull" << "\n";
-        planeCircle2.GetCompsAndRemoved();
-        cout << "BaseHull" << "\n";
-        planeCircle3.GetCompsAndRemoved();
-        cout << "SquareHull" << "\n",
-        planeCircle4.GetCompsAndRemoved();
-        cout << "CircleHull" << "\n";
-        planeCircle5.GetCompsAndRemoved();
-        cout << "LauneyHull4" << "\n";
-        planeCircle6.GetCompsAndRemoved();
-        cout << "LauneyHullRescaled" << "\n";
-        planeCircle7.GetCompsAndRemoved();
-
-        planeRand.GenerateRandomPoints(100, 100, testArr[i]);
-        planeRand2.GenerateRandomPoints(100, 100, testArr[i]);
-        planeRand3.GenerateRandomPoints(100, 100, testArr[i]);
-        planeRand4.GenerateRandomPoints(100, 100, testArr[i]);
-        planeRand5.GenerateRandomPoints(100, 100, testArr[i]);
-        planeRand6.GenerateRandomPoints(100, 100, testArr[i]);
-        planeRand7.GenerateRandomPoints(100, 100, testArr[i]);
-        
-        planeRand.ThrowAwayHull();
-        planeRand2.ThrowAwayHull();
-        planeRand3.ThrowAwayHull();
-        planeRand4.ThrowAwayHull();
-        planeRand5.ThrowAwayHull();
-        planeRand6.ThrowAwayHull();
-        planeRand7.ThrowAwayHull();
-
-        cout << "\n";
-        cout << "############## DATASET: RANDOM POINTS ##############" << "\n";
-        cout << "Number of points: " << testArr[i] << "\n";
-        cout << "LauneyHullRescaledCorners" << "\n";
-        planeRand.GetCompsAndRemoved();
-        cout << "LauneyHull" << "\n";
-        planeRand2.GetCompsAndRemoved();
-        cout << "BaseHull" << "\n";
-        planeRand3.GetCompsAndRemoved();
-        cout << "SquareHull" << "\n",
-        planeRand4.GetCompsAndRemoved();
-        cout << "CircleHull" << "\n";
-        planeRand5.GetCompsAndRemoved();
-        cout << "LauneyHull4" << "\n";
-        planeRand6.GetCompsAndRemoved();
-        cout << "LauneyHullRescaled" << "\n";
-        planeRand7.GetCompsAndRemoved();
 
     }
     return 0;
