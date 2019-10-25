@@ -71,7 +71,6 @@ std::vector<point> PlaneSweep(std::vector<point> p){
         }
         RESULT.push_back(pt);
     }
-    cout << "Planesweep costs: " << comp << "\n";
     RESULT.pop_back();
     return RESULT;
 }
@@ -744,8 +743,83 @@ tuple<vector<point>, int, int> LauneyThrowAwayRescaled(std::vector<point> p) {
 //################### Launey Throwaway Fourth Iteration ########################
 //##############################################################################
 
+tuple<vector<point>, int, int> ReDeComThrow(std::vector<point> p) {
+    vector<point> max_position = Extrema_8(p.begin(), p.end());
+    // the solution below is a temporary solution because we did not 
+    // have time to implement a Extrema function that both returns the
+    // four extrema and the 8 extrema. 
+    // This can be easily fixed in the next iteration.
+    vector<point> max_position2 = Extrema_4_corner(p.begin(), p.end());
+    
+    double xmin = get<0>(max_position[0]);
+    double xmax = get<0>(max_position[4]);
+    double ymin = get<1>(max_position[6]);
+    double ymax = get<1>(max_position[2]);
 
-tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
+    double yRange = (ymax - ymin);
+    double xRange = (xmax - xmin);
+
+    // Scaling the x axis by the y axis 
+    for (I iter = p.begin(); iter != p.end(); iter++){
+        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
+        get<0>(*iter) = newX;
+    }
+    for (I iter = max_position.begin(); iter != max_position.end(); iter++){
+        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
+        get<0>(*iter) = newX;
+    }
+
+    for (I iter = max_position2.begin(); iter != max_position2.end(); iter++){
+        int newX = (get<0>(*iter) - xmin) * yRange / xRange + ymin;
+        get<0>(*iter) = newX;
+    }
+
+    tuple<point, int> Circle = InCircle(max_position);
+    tuple<point, int> Circle2 = InCircle(max_position2);
+    tuple<vector<point>, int, int> RESULT;
+    
+    // Comparing the two different circles 
+    vector<point> max_best_position;
+    if (get<1>(Circle) > get<1>(Circle2)){
+        RESULT = CirclePrune(p,get<0>(Circle),get<1>(Circle));
+        max_best_position = max_position;
+    } else {
+        RESULT = CirclePrune(p,get<0>(Circle2),get<1>(Circle2));
+        max_best_position = max_position2;
+    }
+    
+    // getting intermediary results
+    int comp = get<1>(RESULT);
+    int removed = get<2>(RESULT);
+    
+    // returning the x axis to the right values.
+    vector<point> ScaledHull = get<0>(RESULT);
+    
+    for ( I Iter = ScaledHull.begin(); Iter != ScaledHull.end(); Iter++){
+        int newX = (get<0>(*Iter) - ymin) * xRange / yRange + xmin;
+        get<0>(*Iter) = newX;
+    }
+
+    for ( I Iter = max_best_position.begin(); Iter != max_best_position.end(); Iter++){
+        int newX = (get<0>(*Iter) - ymin) * xRange / yRange + xmin;
+        get<0>(*Iter) = newX;
+    }
+    
+
+    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
+
+}
+
+
+
+
+
+
+//##############################################################################
+//################### Launey Throwaway Fourth Iteration + Prune ################
+//##############################################################################
+
+tuple<vector<point>, int, int> FinalThrowaway(std::vector<point> p) {
     vector<point> max_position = Extrema_8(p.begin(), p.end());
     // the solution below is a temporary solution because we did not 
     // have time to implement a Extrema function that both returns the
@@ -812,7 +886,7 @@ tuple<vector<point>, int, int> BestThrowaway(std::vector<point> p) {
     
 
 
-    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
+    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT) + comp ,get<2>(RESULT) + removed};
 
 }
 
@@ -1006,13 +1080,31 @@ struct LauneyHullRescaled : PointPlane {
 };
 
 
+
+
 // #########################################################################
 // ###################### Launey ThrowAway Combined ########################
 // #########################################################################
 
-struct BestHull : PointPlane {
+struct ReDeComHull : PointPlane {
     int ThrowAwayHull(){
-        tuple<vector<point>,int,int> res = BestThrowaway(this->AllPoints);
+        tuple<vector<point>,int,int> res = ReDeComThrow(this->AllPoints);
+        this->ConveXHull = get<0>(res);
+        this->NrComps = get<1>(res);
+        this->removed =get<2>(res);
+        return 0;
+    }
+};
+
+
+
+// #########################################################################
+// ###################### Launey ThrowAway Combined ########################
+// #########################################################################
+
+struct FinalHull : PointPlane {
+    int ThrowAwayHull(){
+        tuple<vector<point>,int,int> res = FinalThrowaway(this->AllPoints);
         this->ConveXHull = get<0>(res);
         this->NrComps = get<1>(res);
         this->removed =get<2>(res);
@@ -1025,25 +1117,55 @@ struct BestHull : PointPlane {
 
 int main() {   
 
-    int testArr[] = { 100000, 1000000};
+    int testArr[] = { 1000000};
 
     for (int i = 0; i < 6; i++) {
         cout << "\n";
 
-        BestHull planeSquare8;
-        BestHull planeCircle8;
-        BestHull planeRand8;
         
+        ReDeComHull planeSquare;
+        ReDeComHull planeCircle;
+        ReDeComHull planeRand;
+        
+        
+        FinalHull planeSquare8;
+        FinalHull planeCircle8;
+        FinalHull planeRand8;
+        
+
+
+
+        cout << " ReDeCom Hull\n";
         cout << "Number of points: " << testArr[i] << "\n";
-        cout << "\nsquare";
+        cout << "\nsquare\n";
+        planeSquare.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare.ThrowAwayHull();
+        planeSquare.GetCompsAndRemoved();
+        cout << "\nCircle\n";
+        planeCircle.GenerateCirclePoints(1000, testArr[i]);    
+        planeCircle.ThrowAwayHull();
+        planeCircle.GetCompsAndRemoved();
+        cout << "\nRandom\n";
+        planeRand.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand.ThrowAwayHull();
+        planeRand.GetCompsAndRemoved();
+
+
+
+
+
+
+        cout << " Final Hull\n";
+        cout << "Number of points: " << testArr[i] << "\n";
+        cout << "\nsquare\n";
         planeSquare8.GenerateSquarePoints(1000, 1000, testArr[i]);
         planeSquare8.ThrowAwayHull();
         planeSquare8.GetCompsAndRemoved();
-        cout << "\nCircle";
+        cout << "\nCircle\n";
         planeCircle8.GenerateCirclePoints(1000, testArr[i]);    
         planeCircle8.ThrowAwayHull();
         planeCircle8.GetCompsAndRemoved();
-        cout << "\nRandom";
+        cout << "\nRandom\n";
         planeRand8.GenerateRandomPoints(1000, 1000, testArr[i]);
         planeRand8.ThrowAwayHull();
         planeRand8.GetCompsAndRemoved();
