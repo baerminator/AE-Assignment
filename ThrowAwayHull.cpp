@@ -1024,31 +1024,374 @@ struct BestHull : PointPlane {
 
 
 int main() {   
+        
+        
+    //OUT-COMMENT THE FOLLOWING TO TEST ALL IMPLEMENTATIONS ON ALL SHAPES AND FOR VALUES {1000, 10000, 100000, 100000, 1000000}:
+    /*    
+    int testArr[] = {1000, 10000, 100000, 1000000};
+    for (int i = 0; i < 4; i++) {
 
-    int testArr[] = { 100000, 1000000};
+        LauneyHullRescaledCorners planeSquare;
+        LauneyHullRescaledCorners planeCircle;
+        LauneyHullRescaledCorners planeRand;
 
-    for (int i = 0; i < 6; i++) {
-        cout << "\n";
+        LauneyHull planeSquare2;
+        LauneyHull planeCircle2;
+        LauneyHull planeRand2;
+
+        BaseHull planeSquare3;
+        BaseHull planeCircle3;
+        BaseHull planeRand3;
+
+        SquareHull planeSquare4;
+        SquareHull planeCircle4;
+        SquareHull planeRand4;
+
+        CircleHull planeSquare5;
+        CircleHull planeCircle5;
+        CircleHull planeRand5;
+
+        LauneyHull4 planeSquare6;
+        LauneyHull4 planeCircle6;
+        LauneyHull4 planeRand6;
+
+        LauneyHullRescaled planeSquare7;
+        LauneyHullRescaled planeCircle7;
+        LauneyHullRescaled planeRand7;
 
         BestHull planeSquare8;
         BestHull planeCircle8;
         BestHull planeRand8;
-        
-        cout << "Number of points: " << testArr[i] << "\n";
-        cout << "\nsquare";
-        planeSquare8.GenerateSquarePoints(1000, 1000, testArr[i]);
-        planeSquare8.ThrowAwayHull();
-        planeSquare8.GetCompsAndRemoved();
-        cout << "\nCircle";
-        planeCircle8.GenerateCirclePoints(1000, testArr[i]);    
-        planeCircle8.ThrowAwayHull();
-        planeCircle8.GetCompsAndRemoved();
-        cout << "\nRandom";
-        planeRand8.GenerateRandomPoints(1000, 1000, testArr[i]);
-        planeRand8.ThrowAwayHull();
-        planeRand8.GetCompsAndRemoved();
 
+        planeSquare.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare2.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare3.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare4.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare5.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare6.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare7.GenerateSquarePoints(1000, 1000, testArr[i]);
+        planeSquare8.GenerateSquarePoints(1000, 1000, testArr[i]);
+//
+        planeSquare.ThrowAwayHull();
+        planeSquare2.ThrowAwayHull();
+        planeSquare3.ThrowAwayHull();
+        planeSquare4.ThrowAwayHull();
+        planeSquare5.ThrowAwayHull();
+        planeSquare6.ThrowAwayHull();
+        planeSquare7.ThrowAwayHull();
+        planeSquare8.ThrowAwayHull();
+
+        cout << "\n";
+        cout << "############## DATASET: SQUARE POINTS ##############" << "\n";
+        cout << "Number of points: " << testArr[i] << "\n";
+        planeSquare8.GetCompsAndRemoved();
+        cout << "LauneyHull" << "\n";
+        planeSquare2.GetCompsAndRemoved();
+        cout << "BaseHull" << "\n";
+        planeSquare3.GetCompsAndRemoved();
+        cout << "SquareHull" << "\n",
+        planeSquare4.GetCompsAndRemoved();
+        cout << "CircleHull" << "\n";
+        planeSquare5.GetCompsAndRemoved();
+        cout << "LauneyHull4" << "\n";
+        planeSquare6.GetCompsAndRemoved();
+        cout << "LauneyHullRescaled" << "\n";
+        planeSquare7.GetCompsAndRemoved();
+
+        planeCircle.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle2.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle3.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle4.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle5.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle6.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle7.GenerateCirclePoints(1000, testArr[i]);
+        planeCircle8.GenerateCirclePoints(1000, testArr[i]);    
+
+        planeCircle.ThrowAwayHull();
+        planeCircle2.ThrowAwayHull();
+        planeCircle3.ThrowAwayHull();
+        planeCircle4.ThrowAwayHull();
+        planeCircle5.ThrowAwayHull();
+        planeCircle6.ThrowAwayHull();
+        planeCircle7.ThrowAwayHull();
+        planeCircle8.ThrowAwayHull();
+
+        cout << "\n";
+        cout << "############## DATASET: CIRCULAR POINTS ##############" << "\n";
+        cout << "Number of points: " << testArr[i] << "\n";
+        cout << "Delauney Combined" << "\n";
+        planeCircle8.GetCompsAndRemoved();
+        cout << "LauneyHull" << "\n";
+        planeCircle2.GetCompsAndRemoved();
+        cout << "BaseHull" << "\n";
+        planeCircle3.GetCompsAndRemoved();
+        cout << "SquareHull" << "\n",
+        planeCircle4.GetCompsAndRemoved();
+        cout << "CircleHull" << "\n";
+        planeCircle5.GetCompsAndRemoved();
+        cout << "LauneyHull4" << "\n";
+        planeCircle6.GetCompsAndRemoved();
+        cout << "LauneyHullRescaled" << "\n";
+        planeCircle7.GetCompsAndRemoved();
+
+        planeRand.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand2.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand3.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand4.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand5.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand6.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand7.GenerateRandomPoints(1000, 1000, testArr[i]);
+        planeRand8.GenerateRandomPoints(1000, 1000, testArr[i]);
+
+
+        planeRand.ThrowAwayHull();
+        planeRand2.ThrowAwayHull();
+        planeRand3.ThrowAwayHull();
+        planeRand4.ThrowAwayHull();
+        planeRand5.ThrowAwayHull();
+        planeRand6.ThrowAwayHull();
+        planeRand7.ThrowAwayHull();
+        planeRand8.ThrowAwayHull();
+
+        cout << "\n";
+        cout << "############## DATASET: RANDOM POINTS ##############" << "\n";
+        cout << "Number of points: " << testArr[i] << "\n";
+        cout << "Delauney Combined" << "\n";
+        planeRand8.GetCompsAndRemoved();
+        cout << "LauneyHull" << "\n";
+        planeRand2.GetCompsAndRemoved();
+        cout << "BaseHull" << "\n";
+        planeRand3.GetCompsAndRemoved();
+        cout << "SquareHull" << "\n",
+        planeRand4.GetCompsAndRemoved();
+        cout << "CircleHull" << "\n";
+        planeRand5.GetCompsAndRemoved();
+        cout << "LauneyHull4" << "\n";
+        planeRand6.GetCompsAndRemoved();
+        cout << "LauneyHullRescaled" << "\n";
+        planeRand7.GetCompsAndRemoved();
 
     }
+    */
+
+    //OUT-COMMENT THE FOLLOWING ONE AT A TIME TO GET PICTURES OF HULLS:
+
+    BestHull planeSquare;
+    BestHull planeCircle;
+    BestHull planeRand;
+
+    LauneyHull planeSquare2;
+    LauneyHull planeCircle2;
+    LauneyHull planeRand2;
+
+    LauneyHull4 planeSquare3;
+    LauneyHull4 planeCircle3;
+    LauneyHull4 planeRand3;
+
+    LauneyHullRescaled planeSquare4;
+    LauneyHullRescaled planeCircle4;
+    LauneyHullRescaled planeRand4;
+
+    BaseHull planeSquare5;
+    BaseHull planeCircle5;
+    BaseHull planeRand5;
+
+    SquareHull planeSquare6;
+    SquareHull planeCircle6;
+    SquareHull planeRand6;
+
+    CircleHull planeSquare7;
+    CircleHull planeCircle7;
+    CircleHull planeRan7;
+
+    //SQUARE BEST HULL:
+    /*
+    planeSquare.GenerateSquarePoints(1000, 1000, 1000);
+    planeSquare.ThrowAwayHull();
+    planeSquare.GetCompsAndRemoved();
+    planeSquare.GetPoints();
+    planeSquare.GetHull();
+    */
+
+    //CIRCLE BEST HULL 
+    /*
+    planeCircle.GenerateCirclePoints(1000, 1000);
+    planeCircle.ThrowAwayHull();
+    planeCircle.GetCompsAndRemoved();
+    planeCircle.GetPoints();
+    planeCircle.GetHull();
+    */
+
+    //RANDOM BEST HULL
+    /*
+    planeRand.GenerateRandomPoints(1000, 1000, 1000);
+    planeRand.ThrowAwayHull();
+    planeRand.GetCompsAndRemoved();
+    planeRand.GetPoints();
+    planeRand.GetHull();
+    */
+
+    //SQUARE LAUNEY HULL
+    /*
+    planeSquare2.GenerateSquarePoints(1000, 1000, 1000);
+    planeSquare2.ThrowAwayHull();
+    planeSquare2.GetCompsAndRemoved();
+    planeSquare2.GetPoints();
+    planeSquare2.GetHull();
+    */
+
+    //CIRCLE LAUNEY HULL 
+    /*
+    planeCircle2.GenerateCirclePoints(1000, 1000);
+    planeCircle2.ThrowAwayHull();
+    planeCircle2.GetCompsAndRemoved();
+    planeCircle2.GetPoints();
+    planeCircle2.GetHull();
+    */
+
+    //RANDOM LAUNEY HULL
+    /*
+    planeRandom2.GenerateRandomPoints(1000, 1000, 1000);
+    planeRandom2.ThrowAwayHull();
+    planeRandom2.GetCompsAndRemoved();
+    planeRandom2.GetPoints();
+    planeRandom2.GetHull();
+    */
+    
+    //LAUNEY4 SQUARE HULL
+    /*
+    planeSquare3.GenerateSquarePoints(1000, 1000, 1000);
+    planeSquare3.ThrowAwayHull();
+    planeSquare3.GetCompsAndRemoved();
+    planeSquare3.GetPoints();
+    planeSquare3.GetHull();
+    */
+
+    //LAUNEY4 CIRCLE HULL
+    /*
+    planeCircle3.GenerateCirclePoints(1000, 1000);
+    planeCircle3.ThrowAwayHull();
+    planeCircle3.GetCompsAndRemoved();
+    planeCircle3.GetPoints();
+    planeCircle3.GetHull();
+    */
+    
+    //LAUNEY4 SQUARE HULL
+    /*
+    planeRandom3.GenerateRandomPoints(1000, 1000, 1000);
+    planeRandom3.ThrowAwayHull();
+    planeRandom3.GetCompsAndRemoved();
+    planeRandom3.GetPoints();
+    planeRandom3.GetHull();
+    */
+
+    //LAUNEY RESCALED SQUARE HULL
+    /*
+    planeSquare4.GenerateSquarePoints(1000, 1000, 1000);
+    planeSquare4.ThrowAwayHull();
+    planeSquare4.GetCompsAndRemoved();
+    planeSquare4.GetPoints();
+    planeSquare4.GetHull();
+    */
+
+    //LAUNEY RESCALED CIRCLE HULL
+    /*
+    planeCircle4.GenerateCirclePoints(1000, 1000);
+    planeCircle4.ThrowAwayHull();
+    planeCircle4.GetCompsAndRemoved();
+    planeCircle4.GetPoints();
+    planeCircle4.GetHull();
+    */
+
+    //LAUNEY RESCALED RANDOM HULL
+    /*
+    planeRandom4.GenerateRandomPoints(1000, 1000, 1000);
+    planeRandom4.ThrowAwayHull();
+    planeRandom4.GetCompsAndRemoved();
+    planeRandom4.GetPoints();
+    planeRandom4.GetHull();
+    */
+
+    // BASE HULL SQUARE HULL
+    /*
+    planeSquare5.GenerateSquarePoints(1000, 1000, 1000);
+    planeSquare5.ThrowAwayHull();
+    planeSquare5.GetCompsAndRemoved();
+    planeSquare5.GetPoints();
+    planeSquare5.GetHull();
+    */
+
+    //BASE HULL CIRCLE HULL
+    /*
+    planeCircle5.GenerateCirclePoints(1000, 1000);
+    planeCircle5.ThrowAwayHull();
+    planeCircle5.GetCompsAndRemoved();
+    planeCircle5.GetPoints();
+    planeCircle5.GetHull();
+    */
+
+    //BASE HULL RANDOM HULL
+    /*
+    planeRandom5.GenerateRandomPoints(1000, 1000, 1000);
+    planeRandom5.ThrowAwayHull();
+    planeRandom5.GetCompsAndRemoved();
+    planeRandom5.GetPoints();
+    planeRandom5.GetHull();
+    */
+
+    // SQUARE HULL SQUARE HULL
+    /*
+    planeSquare6.GenerateSquarePoints(1000, 1000, 1000);
+    planeSquare6.ThrowAwayHull();
+    planeSquare6.GetCompsAndRemoved();
+    planeSquare6.GetPoints();
+    planeSquare6.GetHull();
+    */
+
+    //SQUARE HULL CIRCLE HULL
+    /*
+    planeCircle6.GenerateCirclePoints(1000, 1000);
+    planeCircle6.ThrowAwayHull();
+    planeCircle6.GetCompsAndRemoved();
+    planeCircle6.GetPoints();
+    planeCircle6.GetHull();
+    */
+
+    //SQUARE HULL RANDOM HULL
+    /*
+    planeRandom6.GenerateRandomPoints(1000, 1000, 1000);
+    planeRandom6.ThrowAwayHull();
+    planeRandom6.GetCompsAndRemoved();
+    planeRandom6.GetPoints();
+    planeRandom6.GetHull();
+    */
+
+    // CIRCLE HULL SQUARE HULL
+    /*
+    planeSquare7.GenerateSquarePoints(1000, 1000, 1000);
+    planeSquare7.ThrowAwayHull();
+    planeSquare7.GetCompsAndRemoved();
+    planeSquare7.GetPoints();
+    planeSquare7.GetHull();
+    */
+
+    //CIRCLE HULL CIRCLE HULL
+    /*
+    planeCircle7.GenerateCirclePoints(1000, 1000);
+    planeCircle7.ThrowAwayHull();
+    planeCircle7.GetCompsAndRemoved();
+    planeCircle7.GetPoints();
+    planeCircle7.GetHull();
+    */
+
+    //CIRCLE HULL RANDOM HULL
+    /*
+    planeRandom7.GenerateRandomPoints(1000, 1000, 1000);
+    planeRandom7.ThrowAwayHull();
+    planeRandom7.GetCompsAndRemoved();
+    planeRandom7.GetPoints();
+    planeRandom7.GetHull();
+    */
+    
     return 0;
 }
