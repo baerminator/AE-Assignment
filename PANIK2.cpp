@@ -262,18 +262,19 @@ tuple<vector<point>, int, int> Prune(std::vector<point> Points, std::vector<poin
     for (I iter = Points.begin(); iter != Points.end(); iter++)
     {
         dinmor = true;
-        if (ccw(*prev((Approx.end())), *(Approx.begin()), (*iter)))
+        if (!ccw(*prev((Approx.end())), (*iter), *(Approx.begin())))
         {
             RESULT.push_back(*iter);
             dinmor = false;
         }
         comps++;
+
         for (I Extreme = Approx.begin(); Extreme != prev(Approx.end()); Extreme++)
         {
             if (dinmor)
             {
                 comps++;
-                if (ccw(*Extreme, *next(Extreme), *iter))
+                if (!ccw(*Extreme, (*iter), *next(Extreme)))
                 {
                     RESULT.push_back(*iter);
                     dinmor = false;
@@ -285,7 +286,8 @@ tuple<vector<point>, int, int> Prune(std::vector<point> Points, std::vector<poin
             removed++;
         }
     }
-    return {PlaneSweep(RESULT), comps, removed};
+    return {RESULT, comps, removed};
+    //return {PlaneSweep(RESULT), comps, removed};
 }
 
 
@@ -342,7 +344,8 @@ tuple<vector<point>, int, int> BasicThrowAway(std::vector<point> p)
     tuple<vector<point>, int, int> RESULT;
     max_position = Extrema_8(p.begin(), p.end());
     RESULT = Prune(p, max_position);
-    return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT), get<2>(RESULT)};
+    return {(get<0>(RESULT)), get<1>(RESULT), get<2>(RESULT)};
+    //return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT), get<2>(RESULT)};
 }
 
 // ############################################################################
@@ -369,10 +372,6 @@ tuple<double, double, double, double> circleInTri(vector<point> p) {
         xCoords.push_back(get<0>(p[i]));
         yCoords.push_back(get<1>(p[i]));
     }
-    for (std::size_t i = 0; i != 3; i++) {
-        cout << "x " << i << " is: " << xCoords[i] << "\n";
-        cout << "y " << i << " is: " << yCoords[i] << "\n";
-    }
     double a = (double)(sqrt(pow((double) xCoords[1]-xCoords[2], 2.0) + pow((double) yCoords[1]-yCoords[2], 2.0)));
     double b = (double)(sqrt(pow((double) xCoords[0]-xCoords[2], 2.0) + pow((double) yCoords[0]-yCoords[2], 2.0)));
     double c = (double)(sqrt(pow((double) xCoords[0]-xCoords[1], 2.0) + pow((double) yCoords[0]-yCoords[1], 2.0)));
@@ -381,14 +380,14 @@ tuple<double, double, double, double> circleInTri(vector<point> p) {
     double x_c = (double)((a*xCoords[0]+b*xCoords[1]+c*xCoords[2])/(a+b+c));
     double y_c = (double)((a*yCoords[0]+b*yCoords[1]+c*yCoords[2])/(a+b+c));
     double A = (double)(M_PI*pow(r, 2.0));
-    cout << "a is: " << a << "b is: " << b << "c is: " << c << "r is: " << r << "Area is: " << A << "\n";
+    //cout << "a is: " << a << "b is: " << b << "c is: " << c << "r is: " << r << "Area is: " << A << "\n";
     tuple<double, double, double, double> RESULT = {x_c, y_c, r, A};
     return RESULT;
 }
 
 //Find largest incircle in rectangle
 tuple<double, double, double, double> isRectangle(std::vector<int> xCoords) {
-    cout << "Four points form rectangle";
+    //cout << "Four points form rectangle";
     double x_c = (xCoords[3] - xCoords[0])/2;
     double y_c = (xCoords[1] - xCoords[0])/2;
     double r = x_c - xCoords[0];
@@ -399,12 +398,12 @@ tuple<double, double, double, double> isRectangle(std::vector<int> xCoords) {
 
 //Find largest incircle in Rhomba
 tuple<double, double, double, double> isRhombus(std::vector<int> xCoords, std::vector<int> yCoords) {
-    cout << "Rhombus spotted\n";
+    //cout << "Rhombus spotted\n";
 }
 
 //Find largest incircle in Parallelogram 
 tuple<double, double, double, double> isParallelogram(std::vector<int> xCoords, std::vector<int> yCoords) {
-    cout << "Parallelogram spotted\n";
+    //cout << "Parallelogram spotted\n";
 }
 
 
@@ -417,14 +416,14 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
     I ui = std::unique(max_positionSort.begin(), max_positionSort.end());
     max_positionSort.resize(std::distance(max_positionSort.begin(), ui));
     if (max_positionSort.size() == 3) { //There are only three extreme points, find incircle in the triangle
-        cout << "Max_positionSort.size() == 3\n";
+        //cout << "Max_positionSort.size() == 3\n";
         return circleInTri(max_positionSort);
     }
     for (std::size_t i = 0; i < max_position.size(); i++) {
         xCoords.push_back(get<0>(max_position[i]));
-        cout << "x" << i << "is: " << xCoords[i] << "\n";
+        //cout << "x" << i << "is: " << xCoords[i] << "\n";
         yCoords.push_back(get<1>(max_position[i]));
-        cout << "y" << i << "is: " << yCoords[i];
+        //cout << "y" << i << "is: " << yCoords[i];
     }
     if (xCoords[0] == xCoords[1] && xCoords[2] == xCoords[3]) { //Four points form a rectangle
         return isRectangle(xCoords);
@@ -458,7 +457,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
     }
     //Opposite sides AB and CD must collide if different slopes
     if (AB_Slope != CD_Slope && BC_Slope == DA_Slope) { //Find point of collision x_p through determinant
-        cout << "AB_Slope: " << AB_Slope << "CD_Slope: " << CD_Slope << "BC slope: " << BC_Slope << "DA_Slope: " << DA_Slope << "\n";
+        //cout << "AB_Slope: " << AB_Slope << "CD_Slope: " << CD_Slope << "BC slope: " << BC_Slope << "DA_Slope: " << DA_Slope << "\n";
         double x_p = ((xCoords[0]*yCoords[1]-yCoords[0]*xCoords[1])*(xCoords[2]-xCoords[3])
         -(xCoords[0]-xCoords[1])*(xCoords[2]*yCoords[3]-yCoords[2]*xCoords[3]))/
         (xCoords[0]-xCoords[1]*(yCoords[2]-yCoords[3])-(yCoords[0]-yCoords[1])*(xCoords[2]-xCoords[3]));
@@ -476,7 +475,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         } 
         AB_p1.push_back(P);
         AB_p2.push_back(P);
-        cout << "AB and CD intersect\n";
+        //cout << "AB and CD intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(AB_p1);
         tuple<double, double, double, double> Circle2 = circleInTri(AB_p2);
         if (get<3>(Circle1) >= get<3>(Circle2)) { //Return circle with largest area
@@ -505,7 +504,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         } 
         BC_p1.push_back(P);
         BC_p2.push_back(P);
-        cout << "BC and DA intersect\n";
+        //cout << "BC and DA intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(BC_p1);
         tuple<double, double, double, double> Circle2 = circleInTri(BC_p2);
         if (get<3>(Circle1) >= get<3>(Circle2)) {
@@ -527,7 +526,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
 
         point ABCD_P = std::make_tuple(ABCD_x_p, ABCD_y_p);
 
-        cout << "Intersection Point ABCD_p: " << ABCD_x_p << " " << ABCD_y_p << "\n";
+        //cout << "Intersection Point ABCD_p: " << ABCD_x_p << " " << ABCD_y_p << "\n";
         //X1 = 1 X2 = 2 X3 = 3 X4 = 0
         double BCDA_x_p = ((xCoords[1]*yCoords[2]-yCoords[1]*xCoords[2])*(xCoords[3]-xCoords[0])
         -(xCoords[1]-xCoords[2])*(xCoords[3]*yCoords[0]-yCoords[3]*xCoords[0]))/
@@ -538,7 +537,7 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         ((xCoords[1]-xCoords[2])*(yCoords[3]-yCoords[0])-(yCoords[1]-yCoords[2])*(xCoords[3]-xCoords[0]));
         //cout << "Intersection Point: " << ABCD_x_p << " " << ABCD_y_p << "\n";
         point BCDA_P = std::make_tuple(BCDA_x_p, BCDA_y_p);
-        cout << "Intersection Point BCDA_P " << BCDA_x_p << " " << BCDA_y_p << "\n";
+        //cout << "Intersection Point BCDA_P " << BCDA_x_p << " " << BCDA_y_p << "\n";
         vector<point> ABCD_p1, ABCD_p2, BCDA_p1, BCDA_p2;
 
         for (std::size_t i = 0; i < 2; i++) {
@@ -553,30 +552,30 @@ tuple<double, double, double, double> circleThing(std::vector<point> p) {
         ABCD_p2.push_back(BCDA_P); //
         BCDA_p1.push_back(ABCD_P);
         BCDA_p2.push_back(ABCD_P);
-        cout << "All sides intersect\n";
+        //cout << "All sides intersect\n";
         tuple<double, double, double, double> Circle1 = circleInTri(ABCD_p1);
         tuple<double, double, double, double> Circle2 = circleInTri(ABCD_p2);
         tuple<double, double, double, double> Circle3 = circleInTri(BCDA_p1);
         tuple<double, double, double, double> Circle4 = circleInTri(BCDA_p2);
         double biggestArea = std::max({get<3>(Circle1), get<3>(Circle2), get<3>(Circle3), get<3>(Circle4)});
         if (biggestArea == get<3>(Circle1)) {
-            cout << "Circle1\n";
-            cout << "Final circle x: " << get<0>(Circle1) << "y Coordinate: " << get<1>(Circle1) << "Radius: " << get<2>(Circle1) << "Area: " << get<3>(Circle1) << "\n";
+            //cout << "Circle1\n";
+            //cout << "Final circle x: " << get<0>(Circle1) << "y Coordinate: " << get<1>(Circle1) << "Radius: " << get<2>(Circle1) << "Area: " << get<3>(Circle1) << "\n";
             return Circle1;
         }
         else if (biggestArea == get<3>(Circle2)) {
-            cout <<"Circle2\n";
-            cout << "Final circle x: " << get<0>(Circle2) << "y Coordinate: " << get<1>(Circle2) << "Radius: " << get<2>(Circle2) << "Area: " << get<3>(Circle2) << "\n";
+            //cout <<"Circle2\n";
+            //cout << "Final circle x: " << get<0>(Circle2) << "y Coordinate: " << get<1>(Circle2) << "Radius: " << get<2>(Circle2) << "Area: " << get<3>(Circle2) << "\n";
             return Circle2;
         }
         else if (biggestArea == get<3>(Circle3)) {
-            cout << "Circle3\n";
-            cout << "Final circle x: " << get<0>(Circle3) << "y Coordinate: " << get<1>(Circle3) << "Radius: " << get<2>(Circle3) << "Area: " << get<3>(Circle3) << "\n";
+            //cout << "Circle3\n";
+            //cout << "Final circle x: " << get<0>(Circle3) << "y Coordinate: " << get<1>(Circle3) << "Radius: " << get<2>(Circle3) << "Area: " << get<3>(Circle3) << "\n";
             return Circle3;
         }
         else {
-            cout << "Circle4\n";
-            cout << "Final circle x: " << get<0>(Circle4) << "y Coordinate: " << get<1>(Circle4) << "Radius: " << get<2>(Circle4) << "Area: " << get<3>(Circle4) << "\n";
+            //cout << "Circle4\n";
+            //cout << "Final circle x: " << get<0>(Circle4) << "y Coordinate: " << get<1>(Circle4) << "Radius: " << get<2>(Circle4) << "Area: " << get<3>(Circle4) << "\n";
             //cout << "The final circle is: " << "X coordinate: " << get<0>(Circle(4))
             return Circle4;
         }
@@ -627,7 +626,7 @@ tuple<double, double, double> ApproxCircle(std::vector<point> p)
     double alpha = pow(u_c, 2.0)+pow(v_c, 2.0)+(S_uu+S_vv)/max_position.size();
     double radius = sqrt(alpha);
     tuple<double, double, double> RESULT = {x_c, y_c, radius};
-    cout << radius; 
+    //cout << radius; 
     return RESULT;
 }
 
@@ -639,8 +638,6 @@ tuple<vector<point>, int, int> CircleThrowAway(std::vector<point> p)
     return {PlaneSweep(get<0>(RESULT)), get<1>(RESULT),get<2>(RESULT)};
     
 }
-
-
 
 
 
@@ -767,9 +764,9 @@ tuple<vector<point>, int, int> LauneyThrowAwayRescaledCorners(std::vector<point>
 // Dette virker ikke når der er fjernet et element....
     // remove unusable corners: 
         for (I iter = max_position.begin(); iter != max_position.end(); iter ++){
-        cout << " " << get<0>(*iter) << " " << get<1>(*iter) << "\n";
+        //cout << " " << get<0>(*iter) << " " << get<1>(*iter) << "\n";
     }    
-    cout << "\n";
+    //cout << "\n";
     // xmin
     if( get<0>(max_position[0]) == get<0>(max_position[1]) == get<0>(max_position[7]) ){
         max_position[0] = max_position[1];
@@ -789,7 +786,7 @@ tuple<vector<point>, int, int> LauneyThrowAwayRescaledCorners(std::vector<point>
     // removing same objects
     max_position.resize(std::distance(max_position.begin(), std::unique(max_position.begin(), max_position.end())));
     for (I iter = max_position.begin(); iter != max_position.end(); iter ++){
-        cout << " " << get<0>(*iter) << " " << get<1>(*iter) << "\n";
+        //cout << " " << get<0>(*iter) << " " << get<1>(*iter) << "\n";
     }
 
 // OVENSTÅENDE VIRKER IKKE !!!
@@ -906,6 +903,20 @@ struct PointPlane
         return 0;
     };
 
+    int GenerateRandomPoints (int RangeX, int RangeY, int n) {
+        //unsigned seed = 0;
+        int x, y;
+       // std::default_random_engine gen (seed);
+        //std::uniform_int_distribution<> RanInt(RangeX, RangeY);
+        for(int i = 0; i < n; i++) {
+            x = (std::rand() % (RangeX-1));
+            y = (std::rand() % (RangeY-1));
+            point p = std::make_tuple(x, y);
+            this->AllPoints.push_back(p);
+        }
+        return 0;
+    };
+
     int GetPoints (){
         vector<point>::iterator iter;
         std::ofstream outfile;
@@ -978,13 +989,28 @@ struct SquareHull : PointPlane
     }
 };
 
+// ##############################################################
+// ##################### CIRCLE THROWAWAY #######################
+// ##############################################################
+
+struct CircleHull : PointPlane
+{
+    int ThrowAwayHull()
+    {
+        tuple<vector<point>, int, int> res = CircleThingThrowAway(this->AllPoints);
+        this->ConveXHull = get<0>(res);
+        this->NrComps = get<1>(res);
+        this->removed = get<2>(res);
+        return 0;
+    }
+};
 
 // ###############################################################
 // ########################## Launey ThrowAWAY ###################
 // ###############################################################
 struct LauneyHull : PointPlane {
     int ThrowAwayHull(){
-        tuple<vector<point>,int,int> res = CircleThingThrowAway(this->AllPoints);
+        tuple<vector<point>,int,int> res = LauneyThrowAway(this->AllPoints);
         this->ConveXHull = get<0>(res);
         this->NrComps = get<1>(res);
         this->removed =get<2>(res);
@@ -1032,31 +1058,143 @@ struct LauneyHullRescaledCorners : PointPlane {
     }
 };
 
-
-
-
-
 int main() {   
-    LauneyHullRescaledCorners plane;
-    LauneyHull plane2;
-    BaseHull plane3;
-    cout << " Square:\n";
-    plane.GenerateSquarePoints(100,1000,1000);
-    plane2.GenerateSquarePoints(100,1000,1000);
-    plane3.GenerateSquarePoints(1000,1000,1000);
-    cout << " Circle:\n";
-    //plane.GenerateCirclePoints(1000,1000);
-    //plane2.GenerateCirclePoints(1000,1000);
-    plane.GetPoints();
-    cout << " Launey Hull 4 corner:\n";
-    plane.ThrowAwayHull();
-    plane.GetCompsAndRemoved();
-    plane.GetHull();
-    cout << " Launey Hull 8:\n";
-    plane2.ThrowAwayHull();
-    plane2.GetCompsAndRemoved();
-    cout << " Base:\n";
-    plane3.ThrowAwayHull();
-    plane3.GetCompsAndRemoved();
+
+    int testArr[] = {10, 100, 1000, 10000, 100000, 1000000};
+
+    for (int i = 0; i < 6; i++) {
+        cout << "\n";
+        
+        LauneyHullRescaledCorners planeSquare;
+        LauneyHullRescaledCorners planeCircle;
+        LauneyHullRescaledCorners planeRand;
+
+        LauneyHull planeSquare2;
+        LauneyHull planeCircle2;
+        LauneyHull planeRand2;
+
+        BaseHull planeSquare3;
+        BaseHull planeCircle3;
+        BaseHull planeRand3;
+
+        SquareHull planeSquare4;
+        SquareHull planeCircle4;
+        SquareHull planeRand4;
+
+        CircleHull planeSquare5;
+        CircleHull planeCircle5;
+        CircleHull planeRand5;
+
+        LauneyHull4 planeSquare6;
+        LauneyHull4 planeCircle6;
+        LauneyHull4 planeRand6;
+
+        LauneyHullRescaled planeSquare7;
+        LauneyHullRescaled planeCircle7;
+        LauneyHullRescaled planeRand7;
+        
+        planeSquare.GenerateSquarePoints(100, 100, testArr[i]);
+        planeSquare2.GenerateSquarePoints(100, 100, testArr[i]);
+        planeSquare3.GenerateSquarePoints(100, 100, testArr[i]);
+        planeSquare4.GenerateSquarePoints(100, 100, testArr[i]);
+        planeSquare5.GenerateSquarePoints(100, 100, testArr[i]);
+        planeSquare6.GenerateSquarePoints(100, 100, testArr[i]);
+        planeSquare7.GenerateSquarePoints(100, 100, testArr[i]);
+        
+        planeSquare.ThrowAwayHull();
+        planeSquare2.ThrowAwayHull();
+        planeSquare3.ThrowAwayHull();
+        planeSquare4.ThrowAwayHull();
+        planeSquare5.ThrowAwayHull();
+        planeSquare6.ThrowAwayHull();
+        planeSquare7.ThrowAwayHull();
+
+        cout << "\n";
+        cout << "############## DATASET: SQUARE POINTS ##############" << "\n";
+        cout << "Number of points: " << testArr[i] << "\n";
+        cout << "LauneyHullRescaledCorners" << "\n";
+        planeSquare.GetCompsAndRemoved();
+        cout << "LauneyHull" << "\n";
+        planeSquare2.GetCompsAndRemoved();
+        cout << "BaseHull" << "\n";
+        planeSquare3.GetCompsAndRemoved();
+        cout << "SquareHull" << "\n",
+        planeSquare4.GetCompsAndRemoved();
+        cout << "CircleHull" << "\n";
+        planeSquare5.GetCompsAndRemoved();
+        cout << "LauneyHull4" << "\n";
+        planeSquare6.GetCompsAndRemoved();
+        cout << "LauneyHullRescaled" << "\n";
+        planeSquare7.GetCompsAndRemoved();
+
+        planeCircle.GenerateCirclePoints(100, testArr[i]);
+        planeCircle2.GenerateCirclePoints(100, testArr[i]);
+        planeCircle3.GenerateCirclePoints(100, testArr[i]);
+        planeCircle4.GenerateCirclePoints(100, testArr[i]);
+        planeCircle5.GenerateCirclePoints(100, testArr[i]);
+        planeCircle6.GenerateCirclePoints(100, testArr[i]);
+        planeCircle7.GenerateCirclePoints(100, testArr[i]);
+        
+        planeCircle.ThrowAwayHull();
+        planeCircle2.ThrowAwayHull();
+        planeCircle3.ThrowAwayHull();
+        planeCircle4.ThrowAwayHull();
+        planeCircle5.ThrowAwayHull();
+        planeCircle6.ThrowAwayHull();
+        planeCircle7.ThrowAwayHull();
+
+        cout << "\n";
+        cout << "############## DATASET: CIRCULAR POINTS ##############" << "\n";
+        cout << "Number of points: " << testArr[i] << "\n";
+        cout << "LauneyHullRescaledCorners" << "\n";
+        planeCircle.GetCompsAndRemoved();
+        cout << "LauneyHull" << "\n";
+        planeCircle2.GetCompsAndRemoved();
+        cout << "BaseHull" << "\n";
+        planeCircle3.GetCompsAndRemoved();
+        cout << "SquareHull" << "\n",
+        planeCircle4.GetCompsAndRemoved();
+        cout << "CircleHull" << "\n";
+        planeCircle5.GetCompsAndRemoved();
+        cout << "LauneyHull4" << "\n";
+        planeCircle6.GetCompsAndRemoved();
+        cout << "LauneyHullRescaled" << "\n";
+        planeCircle7.GetCompsAndRemoved();
+
+        planeRand.GenerateRandomPoints(100, 100, testArr[i]);
+        planeRand2.GenerateRandomPoints(100, 100, testArr[i]);
+        planeRand3.GenerateRandomPoints(100, 100, testArr[i]);
+        planeRand4.GenerateRandomPoints(100, 100, testArr[i]);
+        planeRand5.GenerateRandomPoints(100, 100, testArr[i]);
+        planeRand6.GenerateRandomPoints(100, 100, testArr[i]);
+        planeRand7.GenerateRandomPoints(100, 100, testArr[i]);
+        
+        planeRand.ThrowAwayHull();
+        planeRand2.ThrowAwayHull();
+        planeRand3.ThrowAwayHull();
+        planeRand4.ThrowAwayHull();
+        planeRand5.ThrowAwayHull();
+        planeRand6.ThrowAwayHull();
+        planeRand7.ThrowAwayHull();
+
+        cout << "\n";
+        cout << "############## DATASET: RANDOM POINTS ##############" << "\n";
+        cout << "Number of points: " << testArr[i] << "\n";
+        cout << "LauneyHullRescaledCorners" << "\n";
+        planeRand.GetCompsAndRemoved();
+        cout << "LauneyHull" << "\n";
+        planeRand2.GetCompsAndRemoved();
+        cout << "BaseHull" << "\n";
+        planeRand3.GetCompsAndRemoved();
+        cout << "SquareHull" << "\n",
+        planeRand4.GetCompsAndRemoved();
+        cout << "CircleHull" << "\n";
+        planeRand5.GetCompsAndRemoved();
+        cout << "LauneyHull4" << "\n";
+        planeRand6.GetCompsAndRemoved();
+        cout << "LauneyHullRescaled" << "\n";
+        planeRand7.GetCompsAndRemoved();
+
+    }
     return 0;
 }
