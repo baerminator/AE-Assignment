@@ -398,13 +398,13 @@ tuple<double, double, double, double> circleInTri(vector<point> p) {
         cout << "x " << i << " is: " << xCoords[i] << "\n";
         cout << "y " << i << " is: " << yCoords[i] << "\n";
     }
-    double a = (double)(sqrt(pow((double) xCoords[0]-xCoords[1], 2.0) + pow((double) yCoords[0]-yCoords[1], 2.0)));
-    double b = (double)(sqrt(pow((double) xCoords[2]-xCoords[1], 2.0) + pow((double) yCoords[2]-yCoords[1], 2.0)));
-    double c = (double)(sqrt(pow((double) xCoords[2]-xCoords[0], 2.0) + pow((double) yCoords[2]-yCoords[0], 2.0)));
+    double a = (double)(sqrt(pow((double) xCoords[1]-xCoords[2], 2.0) + pow((double) yCoords[1]-yCoords[2], 2.0)));
+    double b = (double)(sqrt(pow((double) xCoords[0]-xCoords[2], 2.0) + pow((double) yCoords[0]-yCoords[2], 2.0)));
+    double c = (double)(sqrt(pow((double) xCoords[0]-xCoords[1], 2.0) + pow((double) yCoords[0]-yCoords[1], 2.0)));
     double s = (double)((a+b+c)/2.0);
     double r = (double)(sqrt(s*(s-a)*(s-b)*(s-c))/s);
-    double x_c = (double)((a*xCoords[2]+b*xCoords[0]+c*xCoords[1])/(a+b+c));
-    double y_c = (double)((a*yCoords[2]+b*yCoords[0]+c*yCoords[1])/(a+b+c));
+    double x_c = (double)((a*xCoords[0]+b*xCoords[1]+c*xCoords[2])/(a+b+c));
+    double y_c = (double)((a*yCoords[0]+b*yCoords[1]+c*yCoords[2])/(a+b+c));
     double A = (double)(M_PI*pow(r, 2.0));
     cout << "a is: " << a << "b is: " << b << "c is: " << c << "r is: " << r << "Area is: " << A << "\n";
     tuple<double, double, double, double> RESULT = {x_c, y_c, r, A};
@@ -432,9 +432,7 @@ tuple<double, double, double, double> isParallelogram(std::vector<int> xCoords, 
     cout << "Parallelogram spotted\n";
 }
 
-//MISSING: Find incircle of parallelogram and Rhomba (Possible?)
-//PROBLEM: Is Incircle in rectangle correct? 
-//PROBLEM: Both pairs of opposite sides are none-parallel. Compute all triangles (?)
+
 tuple<double, double, double, double> circleThing(std::vector<point> p) {
     vector<point> max_position = Extrema_4(p.begin(), p.end()); //Find four extreme points
     //The following is used to find number of unique points in vector of extreme points
